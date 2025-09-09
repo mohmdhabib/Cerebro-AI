@@ -1,84 +1,56 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../services/supabaseClient";
-import { updateProfile } from "../services/api";
-import {
-  Loader2,
-  CheckCircle,
-  AlertTriangle,
-  ShieldCheck,
-  Upload,
-} from "lucide-react";
+import { Loader2, CheckCircle, AlertTriangle, ShieldCheck } from "lucide-react";
 
 const SettingsPage = () => {
-  const { user, profile, refreshProfile } = useAuth();
-  const [formData, setFormData] = useState({ full_name: "" });
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState(null);
-
+  const { user } = useAuth();
+  const [profile, setProfile] = useState({ full_name: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState({ message: "", type: "" });
 
+  // Fetch user profile data on component mount
   useEffect(() => {
-    if (profile) {
-      setFormData({ full_name: profile.full_name || "" });
-      setAvatarPreview(profile.avatar_url || null);
+    const fetchProfile = async () => {
+      // Supabase's user object contains metadata we can use for profiles
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        setProfile({ full_name: user.user_metadata.full_name || "" });
+      }
       setLoading(false);
-    }
-  }, [profile]);
+    };
+    fetchProfile();
+  }, []);
 
-  const handleAvatarChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  // Handle profile update form submission
+  const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setStatus({ message: "", type: "" });
     try {
-      let avatarUrl = profile.avatar_url;
-
-      if (avatarFile) {
-        const filePath = `public/${user.id}/${Date.now()}_${avatarFile.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("avatars")
-          .upload(filePath, avatarFile, { upsert: true });
-
-        if (uploadError) throw uploadError;
-
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from("avatars").getPublicUrl(filePath);
-        avatarUrl = publicUrl;
-      }
-
-      await updateProfile({
-        full_name: formData.full_name,
-        avatar_url: avatarUrl,
+      // Use Supabase client to update user metadata
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: profile.full_name },
       });
 
-      await refreshProfile();
-
+      if (error) throw error;
       setStatus({ message: "Profile updated successfully!", type: "success" });
-      setAvatarFile(null);
     } catch (error) {
-      setStatus({
-        message: error.message || "Failed to update profile.",
-        type: "error",
-      });
+      setStatus({ message: "Failed to update profile.", type: "error" });
     } finally {
       setSaving(false);
     }
   };
 
-  const currentAvatar =
-    avatarPreview ||
-    `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`;
+  const avatarUrl = `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`;
 
   if (loading) {
     return (
@@ -98,33 +70,15 @@ const SettingsPage = () => {
       </p>
 
       <div className="max-w-4xl space-y-8">
+        {/* Profile Information Card */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row items-start gap-6"
-          >
-            <div className="flex-shrink-0">
-              <img
-                src={currentAvatar}
-                alt="User Avatar"
-                className="w-24 h-24 rounded-full bg-slate-200 object-cover"
-              />
-              <label
-                htmlFor="avatar-upload"
-                className="mt-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700 cursor-pointer flex items-center justify-center gap-1"
-              >
-                <Upload size={14} /> Change
-              </label>
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="hidden"
-              />
-            </div>
-
-            <div className="flex-1 w-full">
+          <div className="flex items-start gap-6">
+            <img
+              src={avatarUrl}
+              alt="User Avatar"
+              className="w-20 h-20 rounded-full bg-slate-200"
+            />
+            <form onSubmit={handleProfileSubmit} className="flex-1">
               <h2 className="text-xl font-bold text-slate-800">
                 Profile Information
               </h2>
@@ -140,10 +94,8 @@ const SettingsPage = () => {
                     id="full_name"
                     name="full_name"
                     type="text"
-                    value={formData.full_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, full_name: e.target.value })
-                    }
+                    value={profile.full_name || ""}
+                    onChange={handleChange}
                     className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
@@ -191,8 +143,36 @@ const SettingsPage = () => {
                   </div>
                 )}
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
+        </div>
+
+        {/* Security Settings Card */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+            <ShieldCheck size={22} /> Security Settings
+          </h2>
+          <div className="mt-4 border-t pt-4">
+            <p className="text-sm font-medium text-slate-700">
+              Change Password
+            </p>
+            <p className="text-sm text-slate-500 mt-1">
+              Update your password to a new, secure one.
+            </p>
+            <button className="mt-3 px-4 py-2 text-sm font-semibold bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+              Change Password
+            </button>
+          </div>
+          <div className="mt-4 border-t pt-4">
+            <p className="text-sm font-medium text-red-600">Delete Account</p>
+            <p className="text-sm text-slate-500 mt-1">
+              Permanently delete your account and all associated data. This
+              action cannot be undone.
+            </p>
+            <button className="mt-3 px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100">
+              Delete My Account
+            </button>
+          </div>
         </div>
       </div>
     </div>
