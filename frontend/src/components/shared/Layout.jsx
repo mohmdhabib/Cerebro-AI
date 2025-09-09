@@ -1,5 +1,5 @@
-import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   Upload,
@@ -7,16 +7,21 @@ import {
   Users,
   Settings,
   Bell,
+  Menu,
+  X,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 
-const SidebarLink = ({ to, icon, children }) => (
+const SidebarLink = ({ to, icon, children, onClick }) => (
   <NavLink
     to={to}
+    onClick={onClick}
     className={({ isActive }) =>
-      `flex items-center px-4 py-2.5 rounded-lg text-gray-700 hover:bg-cyan-50 transition-colors ${
-        isActive ? "bg-cyan-100 text-cyan-800 font-semibold" : ""
+      `flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
+        isActive
+          ? "bg-indigo-50 text-indigo-600 border-l-4 border-indigo-500"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       }`
     }
   >
@@ -25,14 +30,112 @@ const SidebarLink = ({ to, icon, children }) => (
   </NavLink>
 );
 
-const Layout = ({ children }) => {
-  const { logout, user } = useAuth();
-  const location = useLocation();
+const SidebarContent = ({ closeSidebar }) => {
+  const { logout, user, profile } = useAuth();
+  const avatarUrl =
+    profile?.avatar_url ||
+    `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`;
+  const displayName = profile?.full_name || user?.email;
 
-  // A simple function to get the page title from the path
+  return (
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 h-full">
+      <div className="h-16 flex items-center justify-between border-b border-slate-200 px-4">
+        <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+          NeuroScan
+        </h1>
+        <button
+          onClick={closeSidebar}
+          className="md:hidden p-2 rounded-full hover:bg-slate-100"
+        >
+          <X size={20} className="text-slate-600" />
+        </button>
+      </div>
+      <nav className="flex-1 p-4 space-y-4">
+        <div>
+          <h3 className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Menu
+          </h3>
+          <div className="space-y-1">
+            <SidebarLink
+              to="/"
+              icon={<Home size={20} />}
+              onClick={closeSidebar}
+            >
+              Home
+            </SidebarLink>
+            <SidebarLink
+              to="/upload"
+              icon={<Upload size={20} />}
+              onClick={closeSidebar}
+            >
+              Upload Scan
+            </SidebarLink>
+            <SidebarLink
+              to="/reports"
+              icon={<FileText size={20} />}
+              onClick={closeSidebar}
+            >
+              Reports
+            </SidebarLink>
+            <SidebarLink
+              to="/patients"
+              icon={<Users size={20} />}
+              onClick={closeSidebar}
+            >
+              Patient History
+            </SidebarLink>
+          </div>
+        </div>
+        <div>
+          <h3 className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            General
+          </h3>
+          <div className="space-y-1">
+            <SidebarLink
+              to="/settings"
+              icon={<Settings size={20} />}
+              onClick={closeSidebar}
+            >
+              Settings
+            </SidebarLink>
+          </div>
+        </div>
+      </nav>
+      <div className="p-4 border-t border-slate-200">
+        <div className="flex items-center w-full p-2 rounded-lg">
+          <img
+            src={avatarUrl}
+            alt="User Avatar"
+            className="w-10 h-10 rounded-full bg-slate-200 object-cover"
+          />
+          <div className="ml-3 text-left">
+            <p className="font-semibold text-sm truncate" title={displayName}>
+              {displayName}
+            </p>
+            <button
+              onClick={logout}
+              className="text-xs text-slate-500 hover:text-indigo-600"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+const Layout = ({ children }) => {
+  const { user, profile, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
   const getPageTitle = (pathname) => {
     const pathMap = {
-      "/": "Brain Tumor Detection Dashboard",
+      "/": "Dashboard",
       "/upload": "Upload Scan",
       "/reports": "Reports",
       "/patients": "Patient History",
@@ -41,74 +144,120 @@ const Layout = ({ children }) => {
     return pathMap[pathname] || "NeuroScan";
   };
 
-  return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r flex flex-col shrink-0">
-        <div className="h-16 flex items-center justify-center border-b px-4">
-          <h1 className="text-2xl font-bold text-gray-800">NeuroScan</h1>
-        </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <SidebarLink to="/" icon={<Home size={20} />}>
-            Home
-          </SidebarLink>
-          <SidebarLink to="/upload" icon={<Upload size={20} />}>
-            Upload Scan
-          </SidebarLink>
-          <SidebarLink to="/reports" icon={<FileText size={20} />}>
-            Reports
-          </SidebarLink>
-          <SidebarLink to="/patients" icon={<Users size={20} />}>
-            Patient History
-          </SidebarLink>
-          <SidebarLink to="/settings" icon={<Settings size={20} />}>
-            Settings
-          </SidebarLink>
-        </nav>
-        <div className="p-4 border-t">
-          <button
-            onClick={logout}
-            className="flex items-center w-full px-4 py-2.5 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <div className="flex items-center">
-              <img
-                src="https://i.pravatar.cc/40"
-                alt="Dr. Evelyn Reed"
-                className="w-10 h-10 rounded-full"
-              />
-              <div className="ml-3 text-left">
-                <p className="font-semibold text-sm">Dr. Evelyn Reed</p>
-                <p className="text-xs text-gray-500">Logout</p>
-              </div>
-            </div>
-          </button>
-        </div>
-      </aside>
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target))
+        setIsProfileOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-      {/* Main Content */}
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  const avatarUrl =
+    profile?.avatar_url ||
+    `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`;
+  const displayName = profile?.full_name || user?.email.split("@")[0];
+
+  return (
+    <div className="flex h-screen bg-slate-50 text-slate-800">
+      <div className="hidden md:flex md:shrink-0">
+        <SidebarContent />
+      </div>
+      <div
+        className={`fixed inset-y-0 left-0 z-40 md:hidden transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <SidebarContent closeSidebar={() => setIsSidebarOpen(false)} />
+      </div>
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 bg-white border-b flex items-center justify-between px-6 shrink-0">
-          <h2 className="text-xl font-semibold text-gray-800">
-            {getPageTitle(location.pathname)}
-          </h2>
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden p-2 -ml-2 rounded-md text-slate-600 hover:bg-slate-100"
+            >
+              <Menu size={24} />
+            </button>
+            <h2 className="text-lg sm:text-xl font-semibold text-slate-800">
+              {getPageTitle(location.pathname)}
+            </h2>
+          </div>
           <div className="flex items-center space-x-4">
-            <Bell size={22} className="text-gray-600 cursor-pointer" />
-            <div className="flex items-center">
-              <img
-                src="https://i.pravatar.cc/40"
-                alt="User"
-                className="w-10 h-10 rounded-full"
+            <div className="relative">
+              <Bell
+                size={20}
+                className="text-slate-500 cursor-pointer hover:text-slate-900"
               />
-              <div className="ml-3 text-sm">
-                <p className="font-semibold">
-                  {user?.email.split("@")[0] || "Dr. Evelyn Reed"}
-                </p>
-                <p className="text-gray-500">Neurologist</p>
-              </div>
+              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+            </div>
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center space-x-2 p-1 rounded-full hover:bg-slate-100"
+              >
+                <img
+                  src={avatarUrl}
+                  alt="User Avatar"
+                  className="w-9 h-9 rounded-full bg-slate-200 object-cover"
+                />
+                <div className="ml-1 text-sm hidden sm:block text-left">
+                  <p
+                    className="font-semibold text-slate-700 text-sm truncate"
+                    title={displayName}
+                  >
+                    {displayName}
+                  </p>
+                </div>
+              </button>
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border border-slate-200">
+                  <div className="px-4 py-3 border-b border-slate-200">
+                    <p className="text-sm font-medium text-slate-800">
+                      Signed in as
+                    </p>
+                    <p className="text-sm text-slate-500 truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigate("/settings");
+                      setIsProfileOpen(false);
+                    }}
+                    className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                  >
+                    <Settings size={16} className="mr-2" /> Account Settings
+                  </button>
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsProfileOpen(false);
+                    }}
+                    className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                  >
+                    <LogOut size={16} className="mr-2" /> Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );

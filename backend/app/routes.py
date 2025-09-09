@@ -4,6 +4,15 @@ from . import auth
 import uuid
 from werkzeug.utils import secure_filename
 
+# --- Auth Helper ---
+# This function will now be used by all data routes
+def get_user_from_token():
+    try:
+        user = supabase_service.supabase.auth.get_user()
+        return user, None
+    except Exception as e:
+        return None, str(e)
+
 # --- Auth Routes ---
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
@@ -13,54 +22,87 @@ def signup():
 def login():
     return auth.handle_login()
 
+# --- Profile Route ---
+@app.route('/api/profile', methods=['GET', 'PUT'])
+def handle_profile():
+    user, error = get_user_from_token()
+    if error or not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    # ... (rest of profile logic) ...
+    user_id = user.id
+    if request.method == 'GET':
+        profile, db_error = supabase_service.get_profile(user_id)
+        if db_error: return jsonify({"error": db_error}), 500
+        return jsonify(profile), 200
+    if request.method == 'PUT':
+        profile_data = request.get_json()
+        updated_profile, db_error = supabase_service.update_profile(user_id, profile_data)
+        if db_error: return jsonify({"error": db_error}), 500
+        return jsonify(updated_profile), 200
 
-# --- Patient Routes ---
-@app.route('/api/patients', methods=['GET'])
-def get_patients():
-    data, error = supabase_service.get_all_patients()
-    if error: return jsonify({"error": error}), 500
+# --- Patient Routes (NOW SECURED) ---
+@app.route('/api/patients', methods=['GET', 'POST'])
+def handle_patients():
+    user, error = get_user_from_token()
+    if error or not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if request.method == 'POST':
+        patient_data = request.get_json()
+        new_patient, db_error = supabase_service.create_patient(patient_data)
+        if db_error: return jsonify({"error": db_error}), 500
+        return jsonify(new_patient), 201
+    
+    data, db_error = supabase_service.get_all_patients()
+    if db_error: return jsonify({"error": db_error}), 500
     return jsonify(data), 200
 
-
-# --- Report Routes ---
+# --- Report Routes (NOW SECURED) ---
 @app.route('/api/reports', methods=['GET'])
 def get_reports():
-    data, error = supabase_service.get_all_reports()
-    if error: return jsonify({"error": error}), 500
+    user, error = get_user_from_token()
+    if error or not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    data, db_error = supabase_service.get_all_reports()
+    if db_error: return jsonify({"error": db_error}), 500
     return jsonify(data), 200
 
-
-# --- Scan Routes ---
-# --- NEW ROUTE ---
+# --- Scan Routes (NOW SECURED) ---
 @app.route('/api/scans', methods=['GET'])
 def get_scans():
-    data, error = supabase_service.get_all_scans()
-    if error: return jsonify({"error": error}), 500
+    user, error = get_user_from_token()
+    if error or not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data, db_error = supabase_service.get_all_scans()
+    if db_error: return jsonify({"error": db_error}), 500
     return jsonify(data), 200
-# --- END OF NEW ROUTE ---
 
 @app.route('/api/scans/upload', methods=['POST'])
 def upload_scan():
+    user, error = get_user_from_token()
+    if error or not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
     if 'file' not in request.files:
         return jsonify({"error": "No file part in the request"}), 400
-
+    # ... (rest of upload logic) ...
     file = request.files['file']
     patient_id = request.form.get('patient_id')
-
     if file.filename == '' or not patient_id:
         return jsonify({"error": "File or patient_id is missing"}), 400
-
     filename = secure_filename(file.filename)
     unique_filename = f"{uuid.uuid4()}-{filename}"
     file_content = file.read()
-
     upload_result, error = supabase_service.upload_scan_to_storage(unique_filename, file_content, file.content_type)
     if error: return jsonify({"error": error}), 500
-
     image_url = upload_result
     scan_record, error = supabase_service.create_scan_record(patient_id, image_url, unique_filename)
     if error: return jsonify({"error": error}), 500
-    
     ml_service.run_tumor_detection(scan_record['id'])
-    
     return jsonify({"message": "Scan uploaded successfully", "scan": scan_record}), 201
+
+
+### Why This Fixes the Problem
+

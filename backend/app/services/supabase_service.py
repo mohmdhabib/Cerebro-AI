@@ -14,7 +14,14 @@ def get_all_patients():
         return response.data, None
     except Exception as e:
         return None, str(e)
-
+# --- NEW PROFILE FUNCTIONS ---
+def get_profile(user_id):
+    """Fetches a user's profile from the profiles table."""
+    try:
+        response = supabase.table('profiles').select('*').eq('id', user_id).single().execute()
+        return response.data, None
+    except Exception as e:
+        return None, str(e)
 def get_all_reports():
     try:
         response = supabase.table('reports').select('*, patients(name)').order('created_at', desc=True).execute()
@@ -30,6 +37,16 @@ def get_all_scans():
         return response.data, None
     except Exception as e:
         return None, str(e)
+
+# --- NEW FUNCTION ---
+def create_patient(patient_data):
+    """Creates a new patient record in the database."""
+    try:
+        response = supabase.table('patients').insert(patient_data).execute()
+        return response.data[0], None
+    except Exception as e:
+        return None, str(e)
+# --- END OF NEW FUNCTION ---
 # --- END OF NEW FUNCTION ---
 
 def upload_scan_to_storage(filename, file_content, content_type):
