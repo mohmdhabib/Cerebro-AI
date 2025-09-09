@@ -84,6 +84,7 @@ const UploadScanPage = () => {
       });
       setFile(null);
       setPreview(null);
+      setSelectedPatient("");
     } catch (error) {
       setStatus({
         message:
@@ -106,137 +107,287 @@ const UploadScanPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-slate-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Left Column: Upload Area */}
-          <div>
-            <h2 className="text-xl font-bold text-slate-800">Upload Scan</h2>
-            <p className="text-sm text-slate-500 mt-1">
-              Select a patient and upload their MRI/CT scan image.
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl mb-4 shadow-lg">
+            <UploadCloud className="text-white" size={32} />
+          </div>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            Medical Scan Upload
+          </h1>
+          <p className="text-slate-600 max-w-2xl mx-auto">
+            Upload and analyze medical imaging scans with our advanced
+            AI-powered diagnostic system. Select a patient and upload their MRI
+            or CT scan for instant analysis.
+          </p>
+        </div>
 
-            <form onSubmit={handleSubmit} className="mt-6">
-              <div className="space-y-4">
-                {/* Patient Selection Dropdown */}
-                <div>
+        {/* Main Content Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden backdrop-blur-sm bg-white/95">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            {/* Left Column: Upload Form */}
+            <div className="p-8 lg:p-10 border-r border-slate-100">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <span className="text-indigo-600 font-bold text-sm">1</span>
+                </div>
+                <h2 className="text-2xl font-bold text-slate-800">
+                  Upload Details
+                </h2>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Patient Selection */}
+                <div className="space-y-2">
                   <label
                     htmlFor="patient-select"
-                    className="block text-sm font-medium text-slate-700 mb-1"
+                    className="block text-sm font-semibold text-slate-700"
                   >
                     Select Patient
                   </label>
-                  <select
-                    id="patient-select"
-                    value={selectedPatient}
-                    onChange={(e) => setSelectedPatient(e.target.value)}
-                    className="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  >
-                    <option value="">-- Please choose a patient --</option>
-                    {patients.map((patient) => (
-                      <option key={patient.id} value={patient.id}>
-                        {patient.name} (Age: {patient.age})
+                  <div className="relative">
+                    <select
+                      id="patient-select"
+                      value={selectedPatient}
+                      onChange={(e) => setSelectedPatient(e.target.value)}
+                      className="block w-full px-4 py-3 pr-10 bg-white border-2 border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 cursor-pointer transition-all duration-200 hover:border-indigo-300 hover:shadow-md appearance-none"
+                      style={{
+                        backgroundImage: "none",
+                        WebkitAppearance: "none",
+                        MozAppearance: "none",
+                      }}
+                    >
+                      <option value="" className="text-slate-500">
+                        Choose a patient
                       </option>
-                    ))}
-                  </select>
+                      {patients.map((patient) => (
+                        <option
+                          key={patient.id}
+                          value={patient.id}
+                          className="text-slate-700 py-2"
+                        >
+                          {patient.name} (Age: {patient.age})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-slate-400 transition-transform duration-200"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
-                {/* File Drop Area */}
-                <div
-                  {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors duration-200 ease-in-out
-                    ${
-                      isDragActive
-                        ? "border-indigo-500 bg-indigo-50"
-                        : "border-slate-300 hover:border-indigo-400"
-                    }`}
-                >
-                  <input {...getInputProps()} />
-                  <UploadCloud className="mx-auto text-slate-400" size={40} />
-                  <p className="mt-3 text-sm text-slate-600">
-                    {isDragActive
-                      ? "Drop the file here..."
-                      : "Drag & drop a file here, or click to select"}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
+                {/* Enhanced File Drop Area */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Medical Scan Image
+                  </label>
+                  <div
+                    {...getRootProps()}
+                    className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ease-in-out group
+                      ${
+                        isDragActive
+                          ? "border-indigo-500 bg-indigo-50 scale-[1.02]"
+                          : "border-slate-300 hover:border-indigo-400 hover:bg-slate-50"
+                      }`}
+                  >
+                    <input {...getInputProps()} />
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all duration-300 ${
+                          isDragActive
+                            ? "bg-indigo-100 scale-110"
+                            : "bg-slate-100 group-hover:bg-indigo-50"
+                        }`}
+                      >
+                        <UploadCloud
+                          className={`transition-all duration-300 ${
+                            isDragActive
+                              ? "text-indigo-600"
+                              : "text-slate-500 group-hover:text-indigo-500"
+                          }`}
+                          size={32}
+                        />
+                      </div>
+                      <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                        {isDragActive
+                          ? "Drop your scan here"
+                          : "Upload Medical Scan"}
+                      </h3>
+                      <p className="text-sm text-slate-600 mb-2">
+                        {isDragActive
+                          ? "Release to upload your file"
+                          : "Drag & drop your scan here, or click to browse"}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <span className="px-2 py-1 bg-slate-100 rounded-full">
+                          PNG
+                        </span>
+                        <span className="px-2 py-1 bg-slate-100 rounded-full">
+                          JPG
+                        </span>
+                        <span className="px-2 py-1 bg-slate-100 rounded-full">
+                          GIF
+                        </span>
+                        <span className="text-slate-400">•</span>
+                        <span>Max 10MB</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-6">
+                {/* Enhanced Submit Button */}
                 <button
                   type="submit"
                   disabled={!file || !selectedPatient || loading}
-                  className="w-full flex justify-center items-center gap-2 px-4 py-2.5 font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-all duration-200"
+                  className="w-full flex justify-center items-center gap-3 px-6 py-4 font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl shadow-lg hover:shadow-xl disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-[1.02] disabled:hover:scale-100 relative overflow-hidden"
                 >
-                  {loading ? (
+                  {loading && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-700 to-blue-700 flex items-center justify-center">
+                      <Loader2 className="animate-spin mr-2" size={20} />
+                      <span>Processing...</span>
+                    </div>
+                  )}
+                  {!loading && (
                     <>
-                      <Loader2 className="animate-spin" size={20} />
-                      Uploading & Analyzing...
+                      <UploadCloud size={20} />
+                      Upload & Analyze Scan
                     </>
-                  ) : (
-                    "Upload & Process Scan"
                   )}
                 </button>
+              </form>
+            </div>
+
+            {/* Right Column: Preview & Status */}
+            <div className="bg-gradient-to-br from-slate-50 to-blue-50 p-8 lg:p-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <span className="text-blue-600 font-bold text-sm">2</span>
+                </div>
+                <h3 className="text-2xl font-bold text-slate-700">
+                  Preview & Status
+                </h3>
               </div>
-            </form>
-          </div>
 
-          {/* Right Column: Preview & Status */}
-          <div className="bg-slate-50 p-6 rounded-lg">
-            <h3 className="text-lg font-semibold text-slate-700">Preview</h3>
-            <div className="mt-4 h-full min-h-[200px] flex flex-col items-center justify-center">
-              {preview ? (
-                <div className="w-full text-center">
-                  <img
-                    src={preview}
-                    alt="Scan preview"
-                    className="max-h-48 rounded-md mx-auto shadow-md"
-                  />
-                  <div className="mt-4 bg-white p-3 rounded-md border text-left text-sm flex items-center">
-                    <FileImage size={24} className="text-indigo-500 shrink-0" />
-                    <div className="ml-3 overflow-hidden">
-                      <p className="font-medium text-slate-700 truncate">
-                        {file.name}
-                      </p>
-                      <p className="text-slate-500">{formatBytes(file.size)}</p>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 min-h-[400px] flex flex-col">
+                {preview ? (
+                  <div className="text-center flex-1">
+                    <div className="mb-4">
+                      <img
+                        src={preview}
+                        alt="Scan preview"
+                        className="max-h-64 w-auto rounded-xl mx-auto shadow-lg border border-slate-200"
+                      />
                     </div>
-                    <button
-                      onClick={removeFile}
-                      className="ml-auto p-1 rounded-full hover:bg-slate-200"
-                    >
-                      <X size={16} className="text-slate-500" />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500">
-                  Your selected scan will be previewed here.
-                </p>
-              )}
 
-              {status.message && (
-                <div
-                  className={`mt-4 w-full flex items-start gap-3 p-3 text-sm rounded-md ${
-                    status.type === "error"
-                      ? "bg-red-50 text-red-800"
-                      : status.type === "success"
-                      ? "bg-green-50 text-green-800"
-                      : "bg-blue-50 text-blue-800"
-                  }`}
-                >
-                  {status.type === "error" && (
-                    <AlertTriangle size={18} className="shrink-0" />
-                  )}
-                  {status.type === "success" && (
-                    <CheckCircle2 size={18} className="shrink-0" />
-                  )}
-                  <p>{status.message}</p>
-                </div>
-              )}
+                    {/* Enhanced File Info Card */}
+                    <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 rounded-xl border border-indigo-100 text-left">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                            <FileImage size={20} className="text-indigo-600" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-slate-800 truncate text-sm">
+                              {file.name}
+                            </p>
+                            <p className="text-slate-500 text-xs">
+                              {formatBytes(file.size)} • Image File
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={removeFile}
+                          className="w-8 h-8 rounded-full hover:bg-red-100 flex items-center justify-center transition-colors duration-200 group"
+                        >
+                          <X
+                            size={16}
+                            className="text-slate-500 group-hover:text-red-500"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
+                    <div className="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                      <FileImage size={32} className="text-slate-400" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-slate-600 mb-2">
+                      No Scan Selected
+                    </h4>
+                    <p className="text-sm text-slate-500 max-w-xs">
+                      Upload a medical scan image to see the preview and file
+                      details here.
+                    </p>
+                  </div>
+                )}
+
+                {/* Enhanced Status Messages */}
+                {status.message && (
+                  <div
+                    className={`mt-4 flex items-start gap-3 p-4 text-sm rounded-xl border-2 transition-all duration-300 ${
+                      status.type === "error"
+                        ? "bg-red-50 text-red-800 border-red-200"
+                        : status.type === "success"
+                        ? "bg-green-50 text-green-800 border-green-200"
+                        : "bg-blue-50 text-blue-800 border-blue-200"
+                    }`}
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        status.type === "error"
+                          ? "bg-red-100"
+                          : status.type === "success"
+                          ? "bg-green-100"
+                          : "bg-blue-100"
+                      }`}
+                    >
+                      {status.type === "error" && (
+                        <AlertTriangle size={14} className="text-red-600" />
+                      )}
+                      {status.type === "success" && (
+                        <CheckCircle2 size={14} className="text-green-600" />
+                      )}
+                      {status.type === "info" && (
+                        <Loader2
+                          size={14}
+                          className="text-blue-600 animate-spin"
+                        />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium">{status.message}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+        </div>
+
+        {/* Footer Info */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-slate-500">
+            Supported formats: PNG, JPG, GIF • Maximum file size: 10MB •
+            <span className="font-medium">
+              {" "}
+              Secure & HIPAA compliant processing
+            </span>
+          </p>
         </div>
       </div>
     </div>
