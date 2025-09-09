@@ -10,17 +10,44 @@ import {
   Menu,
   X,
   LogOut,
+  BrainCircuit,
+  UserCircle, // Added for the default avatar
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+
+// A dedicated Avatar component for consistent display
+const Avatar = ({ src, className }) => {
+  // If a custom avatar URL is provided, display the image.
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt="User Avatar"
+        className={className}
+        // Fallback in case the image link is broken
+        onError={(e) => (e.currentTarget.style.display = "none")}
+      />
+    );
+  }
+
+  // Otherwise, display the default UserCircle icon.
+  return (
+    <div
+      className={`${className} flex items-center justify-center bg-slate-200 text-slate-500`}
+    >
+      <UserCircle size="75%" />
+    </div>
+  );
+};
 
 const SidebarLink = ({ to, icon, children, onClick }) => (
   <NavLink
     to={to}
     onClick={onClick}
     className={({ isActive }) =>
-      `flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
+      `flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors duration-200 ${
         isActive
-          ? "bg-indigo-50 text-indigo-600 border-l-4 border-indigo-500"
+          ? "bg-indigo-100 text-indigo-700 font-semibold"
           : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       }`
     }
@@ -32,17 +59,20 @@ const SidebarLink = ({ to, icon, children, onClick }) => (
 
 const SidebarContent = ({ closeSidebar }) => {
   const { logout, user, profile } = useAuth();
-  const avatarUrl =
-    profile?.avatar_url ||
-    `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`;
+
+  const avatarUrl = profile?.avatar_url; // We only need the URL, the Avatar component handles the fallback
   const displayName = profile?.full_name || user?.email;
 
   return (
     <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 h-full">
+      {/* Header with Logo */}
       <div className="h-16 flex items-center justify-between border-b border-slate-200 px-4">
-        <h1 className="text-xl font-bold text-slate-800 tracking-tight">
-          NeuroScan
-        </h1>
+        <div className="flex items-center gap-2">
+          <BrainCircuit className="h-7 w-7 text-indigo-600" />
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">
+            NeuroScan
+          </h1>
+        </div>
         <button
           onClick={closeSidebar}
           className="md:hidden p-2 rounded-full hover:bg-slate-100"
@@ -50,6 +80,8 @@ const SidebarContent = ({ closeSidebar }) => {
           <X size={20} className="text-slate-600" />
         </button>
       </div>
+
+      {/* Navigation Links */}
       <nav className="flex-1 p-4 space-y-4">
         <div>
           <h3 className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -101,25 +133,45 @@ const SidebarContent = ({ closeSidebar }) => {
           </div>
         </div>
       </nav>
+
+      {/* Footer with Logout and Profile Link */}
       <div className="p-4 border-t border-slate-200">
-        <div className="flex items-center w-full p-2 rounded-lg">
-          <img
-            src={avatarUrl}
-            alt="User Avatar"
-            className="w-10 h-10 rounded-full bg-slate-200 object-cover"
+        <button
+          onClick={logout}
+          className="flex items-center w-full px-3 py-2.5 rounded-md text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-700 group mb-2 transition-colors duration-200"
+        >
+          <LogOut
+            size={20}
+            className="mr-3 text-slate-500 group-hover:text-red-600 transition-colors duration-200"
           />
-          <div className="ml-3 text-left">
-            <p className="font-semibold text-sm truncate" title={displayName}>
-              {displayName}
-            </p>
-            <button
-              onClick={logout}
-              className="text-xs text-slate-500 hover:text-indigo-600"
-            >
-              Logout
-            </button>
+          <span>Logout</span>
+        </button>
+        <NavLink
+          to="/settings"
+          onClick={closeSidebar}
+          className="block w-full p-2 rounded-lg transition-colors duration-200 hover:bg-slate-100"
+        >
+          <div className="flex items-center">
+            <Avatar
+              src={avatarUrl}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div className="ml-3 text-left overflow-hidden">
+              <p
+                className="font-semibold text-sm text-slate-800 truncate"
+                title={displayName}
+              >
+                {displayName}
+              </p>
+              <p
+                className="text-xs text-slate-500 truncate"
+                title={user?.email}
+              >
+                {user?.email}
+              </p>
+            </div>
           </div>
-        </div>
+        </NavLink>
       </div>
     </aside>
   );
@@ -157,15 +209,13 @@ const Layout = ({ children }) => {
     setIsSidebarOpen(false);
   }, [location.pathname]);
 
-  const avatarUrl =
-    profile?.avatar_url ||
-    `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`;
-  const displayName = profile?.full_name || user?.email.split("@")[0];
+  const avatarUrl = profile?.avatar_url;
+  const displayName = profile?.full_name || user?.email;
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-800">
       <div className="hidden md:flex md:shrink-0">
-        <SidebarContent />
+        <SidebarContent closeSidebar={() => {}} />
       </div>
       <div
         className={`fixed inset-y-0 left-0 z-40 md:hidden transition-transform duration-300 ease-in-out ${
@@ -196,10 +246,9 @@ const Layout = ({ children }) => {
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <Bell
-                size={20}
-                className="text-slate-500 cursor-pointer hover:text-slate-900"
-              />
+              <button className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+                <Bell size={20} />
+              </button>
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
@@ -210,10 +259,9 @@ const Layout = ({ children }) => {
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center space-x-2 p-1 rounded-full hover:bg-slate-100"
               >
-                <img
+                <Avatar
                   src={avatarUrl}
-                  alt="User Avatar"
-                  className="w-9 h-9 rounded-full bg-slate-200 object-cover"
+                  className="w-9 h-9 rounded-full object-cover"
                 />
                 <div className="ml-1 text-sm hidden sm:block text-left">
                   <p
@@ -230,7 +278,10 @@ const Layout = ({ children }) => {
                     <p className="text-sm font-medium text-slate-800">
                       Signed in as
                     </p>
-                    <p className="text-sm text-slate-500 truncate">
+                    <p
+                      className="text-sm text-slate-500 truncate"
+                      title={user?.email}
+                    >
                       {user?.email}
                     </p>
                   </div>

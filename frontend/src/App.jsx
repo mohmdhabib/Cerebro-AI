@@ -1,61 +1,67 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./contexts/AuthContext";
-import LoginPage from "./pages/LoginPage";
-import SignUpPage from "./pages/SignupPage";
-import Dashboard from "./pages/Dashboard";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import Layout from "./components/shared/Layout";
+import HomePage from "./pages/Dashboard";
 import PatientsPage from "./pages/PatientsPage";
 import ReportsPage from "./pages/ReportsPage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignupPage";
 import SettingsPage from "./pages/SettingsPage";
-import Layout from "./components/shared/Layout";
 import UploadScanPage from "./pages/UploadScanPage";
+import { Loader2 } from "lucide-react";
 
-function PrivateRoute({ children }) {
+const AppRoutes = () => {
   const { user, loading } = useAuth();
-  if (loading)
+
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="flex justify-center items-center h-screen bg-slate-50">
+        <Loader2 className="animate-spin text-indigo-600" size={48} />
       </div>
     );
-  return user ? children : <Navigate to="/login" />;
-}
-
-function App() {
-  const { user } = useAuth();
+  }
 
   return (
     <Routes>
-      {/* Public routes for login and signup */}
       <Route
         path="/login"
-        element={user ? <Navigate to="/" /> : <LoginPage />}
+        element={!user ? <LoginPage /> : <Navigate to="/" />}
       />
       <Route
         path="/signup"
-        element={user ? <Navigate to="/" /> : <SignUpPage />}
+        element={!user ? <SignUpPage /> : <Navigate to="/" />}
       />
-
-      {/* Private routes that require authentication */}
       <Route
         path="/*"
         element={
-          <PrivateRoute>
+          user ? (
             <Layout>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/" element={<HomePage />} />
                 <Route path="/upload" element={<UploadScanPage />} />
                 <Route path="/patients" element={<PatientsPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                {/* A fallback route for any unknown paths */}
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </Layout>
-          </PrivateRoute>
+          ) : (
+            <Navigate to="/login" />
+          )
         }
       />
     </Routes>
+  );
+};
+
+// The App component now only wraps the router content.
+// The BrowserRouter and AuthProvider will be in main.jsx.
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 

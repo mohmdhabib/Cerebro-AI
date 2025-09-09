@@ -20,13 +20,18 @@ apiClient.interceptors.request.use(async (config) => {
 // --- Auth Functions ---
 export const loginUser = (email, password) =>
   apiClient.post("/auth/login", { email, password });
-export const signupUser = (email, password) =>
-  apiClient.post("/auth/signup", { email, password });
 
-// --- Profile Functions ---
-export const getProfile = () => apiClient.get("/profile");
-export const updateProfile = (profileData) =>
+// Updated to send all profile data
+export const signupUser = (email, password, profileData) => {
+  return apiClient.post("/auth/signup", { email, password, ...profileData });
+};
+
+// --- Profile Functions (using the patients table) ---
+export const getUserProfile = () => apiClient.get("/profile");
+export const updateUserProfile = (profileData) =>
   apiClient.put("/profile", profileData);
+
+
 
 // --- Data Functions ---
 export const getPatients = () => apiClient.get("/patients");

@@ -1,15 +1,27 @@
 import React, { useState } from "react";
-import { signupUser } from "../services/api";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext"; // Import the useAuth hook
-import { supabase } from "../services/supabaseClient"; // Import supabase client
+import { UserPlus } from "lucide-react";
+import { signupUser } from "../services/api";
+import { supabase } from "../services/supabaseClient";
+import { useAuth } from "../contexts/AuthContext";
 
 const SignUpPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { updateGlobalProfile } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    name: "",
+    title: "",
+    specialty: "",
+    institution: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,81 +29,115 @@ const SignUpPage = () => {
     setLoading(true);
 
     try {
-      // 1. Call your backend to sign up the user
-      const { data } = await signupUser(email, password);
+      const { email, password, ...profileData } = formData;
+      const { data } = await signupUser(email, password, profileData);
 
-      // 2. Set the session in the frontend Supabase client
-      const { error: sessionError } = await supabase.auth.setSession({
+      await supabase.auth.setSession({
         access_token: data.access_token,
         refresh_token: data.refresh_token,
       });
 
-      if (sessionError) throw sessionError;
+      // Manually update the global state with the new profile
+      updateGlobalProfile(data.profile);
 
-      // 3. Navigate to the homepage. The AuthContext will automatically
-      // detect the new session and update the user state.
       navigate("/");
     } catch (err) {
-      setError(
-        err.response?.data?.error || err.message || "Failed to sign up."
-      );
+      setError(err.response?.data?.error || "Failed to sign up.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-lg shadow-md">
+    <div className="flex items-center justify-center min-h-screen bg-slate-50 py-12">
+      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-md border border-slate-200">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800">Create Account</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Join NeuroScan AI for medical professionals
+          <div className="inline-flex items-center justify-center w-12 h-12 mb-4 bg-indigo-100 rounded-full">
+            <UserPlus className="w-6 h-6 text-indigo-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800">
+            Create Your Professional Account
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Join NeuroScan to get started.
           </p>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="6+ characters"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-cyan-500 focus:border-cyan-500"
-            />
-          </div>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            placeholder="Email Address"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <input
+            id="password"
+            name="password"
+            type="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            placeholder="Password (6+ characters)"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <hr className="my-4" />
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            placeholder="Full Name"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <input
+            id="title"
+            name="title"
+            type="text"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            placeholder="Professional Title (e.g., M.D.)"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <input
+            id="specialty"
+            name="specialty"
+            type="text"
+            value={formData.specialty}
+            onChange={handleChange}
+            required
+            placeholder="Specialty (e.g., Neurology)"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <input
+            id="institution"
+            name="institution"
+            type="text"
+            value={formData.institution}
+            onChange={handleChange}
+            required
+            placeholder="Institution / Hospital"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
           {error && <p className="text-sm text-center text-red-600">{error}</p>}
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 font-semibold text-white bg-cyan-500 rounded-md hover:bg-cyan-600 disabled:opacity-50 transition-colors"
+            className="w-full py-2.5 px-4 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? "Creating Account..." : "Sign Up & Enter"}
+            {loading ? "Creating Account..." : "Sign Up and Continue"}
           </button>
         </form>
-
-        <p className="text-sm text-center text-gray-600">
+        <p className="text-sm text-center text-slate-600">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="font-medium text-cyan-600 hover:text-cyan-500"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
           >
             Log In
           </Link>

@@ -1,64 +1,108 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "../services/supabaseClient";
-import { Loader2, CheckCircle, AlertTriangle, ShieldCheck } from "lucide-react";
+import { updateUserProfile } from "../services/api";
+import {
+  Loader2,
+  CheckCircle,
+  AlertTriangle,
+  ShieldCheck,
+  Camera,
+  UserCircle,
+} from "lucide-react";
+
+// A dedicated Avatar component for consistent display
+const Avatar = ({ src, className }) => {
+  if (src) {
+    return <img src={src} alt="User Avatar" className={className} />;
+  }
+  // Fallback to a generic icon if no src is provided
+  return (
+    <div
+      className={`${className} flex items-center justify-center bg-slate-200 text-slate-500`}
+    >
+      <UserCircle size="75%" />
+    </div>
+  );
+};
 
 const SettingsPage = () => {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState({ full_name: "" });
-  const [loading, setLoading] = useState(true);
+  const { user, profile: authProfile, updateGlobalProfile } = useAuth();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    title: "",
+    specialty: "",
+    institution: "",
+  });
+
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState({ message: "", type: "" });
+  const fileInputRef = useRef(null);
 
-  // Fetch user profile data on component mount
+  // Effect to populate the form when the global profile loads or changes
   useEffect(() => {
-    const fetchProfile = async () => {
-      // Supabase's user object contains metadata we can use for profiles
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        setProfile({ full_name: user.user_metadata.full_name || "" });
-      }
-      setLoading(false);
-    };
-    fetchProfile();
-  }, []);
+    if (authProfile) {
+      setFormData({
+        name: authProfile.name || "",
+        title: authProfile.title || "",
+        specialty: authProfile.specialty || "",
+        institution: authProfile.institution || "",
+      });
+    }
+  }, [authProfile]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle profile update form submission
-  const handleProfileSubmit = async (e) => {
+  const handleAvatarSelect = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      setAvatarFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  // This function handles the submission of both text and image data
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setStatus({ message: "", type: "" });
-    try {
-      // Use Supabase client to update user metadata
-      const { error } = await supabase.auth.updateUser({
-        data: { full_name: profile.full_name },
-      });
 
-      if (error) throw error;
+    try {
+      // Use FormData to send both text fields and the optional file
+      const data = new FormData();
+      data.append("name", formData.name);
+      data.append("title", formData.title);
+      data.append("specialty", formData.specialty);
+      data.append("institution", formData.institution);
+
+      if (avatarFile) {
+        data.append("avatar", avatarFile);
+      }
+
+      // Call the API function directly to update the profile
+      const { data: updatedProfile } = await updateUserProfile(data);
+
+      // Update the global state in the context to reflect changes instantly
+      updateGlobalProfile(updatedProfile);
+
       setStatus({ message: "Profile updated successfully!", type: "success" });
+      setAvatarFile(null); // Clear the staged file after upload
+      setPreviewUrl(null); // Clear the preview image
     } catch (error) {
-      setStatus({ message: "Failed to update profile.", type: "error" });
+      setStatus({
+        message: error.response?.data?.error || "Failed to update profile.",
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  const avatarUrl = `https://api.dicebear.com/8.x/initials/svg?seed=${user?.email}`;
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="animate-spin text-indigo-600" size={40} />
-      </div>
-    );
-  }
+  const currentAvatarUrl = previewUrl || authProfile?.avatar_url;
 
   return (
     <div>
@@ -66,52 +110,104 @@ const SettingsPage = () => {
         Settings
       </h1>
       <p className="mt-1 text-sm text-slate-600 mb-8">
-        Manage your profile and account settings.
+        Manage your professional profile and account settings.
       </p>
-
       <div className="max-w-4xl space-y-8">
-        {/* Profile Information Card */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="flex items-start gap-6">
-            <img
-              src={avatarUrl}
-              alt="User Avatar"
-              className="w-20 h-20 rounded-full bg-slate-200"
-            />
-            <form onSubmit={handleProfileSubmit} className="flex-1">
+          <form
+            onSubmit={handleFormSubmit}
+            className="flex flex-col md:flex-row items-start gap-6"
+          >
+            {/* Avatar Upload Section */}
+            <div className="relative group w-24 flex-shrink-0">
+              <Avatar
+                src={currentAvatarUrl}
+                className="w-24 h-24 rounded-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current.click()}
+                className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Camera size={28} className="text-white" />
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarSelect}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+
+            {/* Profile Information Form */}
+            <div className="flex-1 w-full">
               <h2 className="text-xl font-bold text-slate-800">
-                Profile Information
+                Professional Information
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 <div>
                   <label
-                    htmlFor="full_name"
+                    htmlFor="name"
                     className="block text-sm font-medium text-slate-700"
                   >
                     Full Name
                   </label>
                   <input
-                    id="full_name"
-                    name="full_name"
+                    id="name"
+                    name="name"
                     type="text"
-                    value={profile.full_name || ""}
+                    value={formData.name}
                     onChange={handleChange}
                     className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
                 <div>
                   <label
-                    htmlFor="email"
+                    htmlFor="title"
                     className="block text-sm font-medium text-slate-700"
                   >
-                    Email Address
+                    Professional Title
                   </label>
                   <input
-                    id="email"
-                    type="email"
-                    value={user?.email}
-                    readOnly
-                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm bg-slate-100 text-slate-500 cursor-not-allowed"
+                    id="title"
+                    name="title"
+                    type="text"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="specialty"
+                    className="block text-sm font-medium text-slate-700"
+                  >
+                    Specialty
+                  </label>
+                  <input
+                    id="specialty"
+                    name="specialty"
+                    type="text"
+                    value={formData.specialty}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="institution"
+                    className="block text-sm font-medium text-slate-700"
+                  >
+                    Institution / Hospital
+                  </label>
+                  <input
+                    id="institution"
+                    name="institution"
+                    type="text"
+                    value={formData.institution}
+                    onChange={handleChange}
+                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -143,25 +239,17 @@ const SettingsPage = () => {
                   </div>
                 )}
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
 
-        {/* Security Settings Card */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <ShieldCheck size={22} /> Security Settings
+            <ShieldCheck size={22} /> Account Security
           </h2>
           <div className="mt-4 border-t pt-4">
-            <p className="text-sm font-medium text-slate-700">
-              Change Password
-            </p>
-            <p className="text-sm text-slate-500 mt-1">
-              Update your password to a new, secure one.
-            </p>
-            <button className="mt-3 px-4 py-2 text-sm font-semibold bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
-              Change Password
-            </button>
+            <p className="text-sm font-medium text-slate-700">Email Address</p>
+            <p className="text-sm text-slate-500 mt-1">{user?.email}</p>
           </div>
           <div className="mt-4 border-t pt-4">
             <p className="text-sm font-medium text-red-600">Delete Account</p>

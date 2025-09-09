@@ -1,25 +1,44 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { supabase } from "../services/supabaseClient";
-import { loginUser } from "../services/api"; // Import the loginUser function
+import {
+  loginUser as apiLogin,
+  signupUser as apiSignup,
+  getUserProfile,
+  updateUserProfile as apiUpdateProfile,
+} from "../services/api";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // This is the single source of truth for fetching the user's profile.
+  const fetchProfile = async () => {
+    try {
+      const { data } = await getUserProfile();
+      setProfile(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      setProfile(null);
+    }
+  };
+
+  // --- REFACTORED useEffect HOOKS ---
+
+  // Effect 1: Handles the initial session check and stops the main loading screen.
+  // It's only responsible for determining if a user is logged in.
   useEffect(() => {
-    // This function checks if there's an active session
     const getSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      setLoading(false);
+      setLoading(false); // Stop the main loading screen immediately after checking.
     };
     getSession();
 
-    // This listener updates the user state when auth state changes (e.g., on logout)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -31,30 +50,52 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  // UPDATED LOGIN FUNCTION
+  // Effect 2: Fetches the user's profile data *after* the user's auth state is known.
+  // This runs separately and does not block the main application from rendering.
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    } else {
+      // Clear profile when the user logs out
+      setProfile(null);
+    }
+  }, [user]); // This hook runs only when the `user` object changes.
+
   const login = async (email, password) => {
-    // Call our Flask backend to log in
-    const { data } = await loginUser(email, password);
-
-    // After getting the session from our backend, set it in the Supabase client
-    const { error } = await supabase.auth.setSession({
+    const { data } = await apiLogin(email, password);
+    await supabase.auth.setSession({
       access_token: data.access_token,
-      refresh_token: data.refresh_token, // Make sure your backend returns this!
+      refresh_token: data.refresh_token,
     });
+    // The onAuthStateChange listener will handle setting the user and triggering the profile fetch.
+    return { user: data.user };
+  };
 
-    if (error) throw error;
-
-    setUser(data.user);
-    return { user: data.user, error: null };
+  const signup = async (email, password, profileData) => {
+    const { data } = await apiSignup(email, password, profileData);
+    await supabase.auth.setSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+    });
+    // The listener will handle the rest.
+    return { user: data.user };
   };
 
   const logout = () => supabase.auth.signOut();
 
+  // A single function to update the global state after a profile change.
+  const updateGlobalProfile = (newProfile) => {
+    setProfile(newProfile);
+  };
+
   const value = {
     user,
-    login,
-    logout,
+    profile,
     loading,
+    login,
+    signup,
+    logout,
+    updateGlobalProfile,
   };
 
   return (
