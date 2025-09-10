@@ -47,11 +47,14 @@ def get_reports():
         user_id = g.user.id
         user_profile = supabase_service.get_user_profile(user_id)
         
-        if not user_profile:
-             return jsonify({"error": "User profile not found"}), 404
+        # We don't need this check anymore since get_user_profile always returns a profile
+        # if not user_profile:
+        #     return jsonify({"error": "User profile not found"}), 404
 
         reports = supabase_service.get_reports_from_db(user_id, user_profile['role'])
         return jsonify(reports), 200
 
     except Exception as e:
+        print(f"Error in get_reports route: {str(e)}")
+        traceback.print_exc()
         return jsonify({"error": "Failed to fetch reports", "details": str(e)}), 500

@@ -68,7 +68,7 @@ const Layout = ({ children }) => {
     },
     {
       name: "Reports",
-      href: "/reports",
+      href: "/history",
       icon: (
         <svg
           className="w-5 h-5"
@@ -87,7 +87,7 @@ const Layout = ({ children }) => {
     },
     {
       name: "Patient History",
-      href: "/patient-history",
+      href: "/history",
       icon: (
         <svg
           className="w-5 h-5"

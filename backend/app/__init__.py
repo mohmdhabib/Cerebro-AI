@@ -12,7 +12,7 @@ def create_app():
     key = os.environ.get("SUPABASE_KEY")
     app.supabase: Client = create_client(url, key)
 
-    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+    # app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
     # Import and register routes
     from . import routes
