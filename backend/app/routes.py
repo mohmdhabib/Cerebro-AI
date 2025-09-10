@@ -1,3 +1,4 @@
+import traceback
 from flask import Blueprint, request, jsonify, g, current_app
 from .auth import token_required
 from .services import ml_service, supabase_service
@@ -17,25 +18,27 @@ def upload_file():
     try:
         user_id = g.user.id
         
-        # 1. Preprocess the image and get prediction
         prediction, confidence = ml_service.predict(file)
-        
-        # 2. Upload image to Supabase Storage
         image_url = supabase_service.upload_image_to_storage(file, user_id)
 
-        # 3. Save the report to the database
         report_data = {
             "patient_id": user_id,
             "image_url": image_url,
             "prediction": prediction,
-            "confidence": confidence
+            "confidence": float(confidence)
         }
+
+        print("--- Attempting to save this data to Supabase: ---", report_data)
         saved_report = supabase_service.save_report_to_db(report_data)
 
         return jsonify(saved_report), 201
 
     except Exception as e:
+        # THE FIX IS HERE: This line will print the full traceback to your terminal
+        traceback.print_exc()
         return jsonify({"error": "An error occurred during upload and processing", "details": str(e)}), 500
+
+
 
 @bp.route('/reports', methods=['GET'])
 @token_required

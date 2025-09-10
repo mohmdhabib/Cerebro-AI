@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 import Button from "../shared/Button";
+import { HiOutlineMail, HiOutlineLockClosed } from "react-icons/hi"; // 📧 Import icons from react-icons
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -25,46 +26,98 @@ const LoginForm = () => {
   };
 
   return (
-    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-      <div className="rounded-md shadow-sm -space-y-px">
-        <div>
-          <input
-            id="email-address"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            placeholder="Email address"
+    <div className="flex items-center justify-center min-h-screen px-4 py-12 bg-gray-100">
+      <div className="flex flex-col md:flex-row max-w-4xl w-full bg-white rounded-xl shadow-2xl overflow-hidden">
+        {/* Decorative Side (for larger screens) */}
+        <div className="hidden md:flex flex-1 items-center justify-center p-8 bg-indigo-500">
+          <img
+            src="https://img.freepik.com/premium-vector/mobile-login-concept-illustration_114360-83.jpg"
+            alt="Login illustration"
+            className="w-full h-auto rounded-lg"
           />
         </div>
-        <div>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-            placeholder="Password"
-          />
+
+        {/* Form Side */}
+        <div className="flex-1 p-8 md:p-12">
+          <h2 className="text-3xl font-extrabold text-center text-indigo-700 mb-6">
+            Welcome Back
+          </h2>
+          <p className="text-center text-gray-600 mb-8">
+            Sign in to your account to continue.
+          </p>
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email-address" className="sr-only">
+                  Email address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <HiOutlineMail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="email-address"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                    placeholder="Email address"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="password" className="sr-only">
+                  Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <HiOutlineLockClosed className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
+                    placeholder="Password"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="text-sm">
+                <a
+                  href="#"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+
+            <Button type="submit" loading={loading} fullWidth>
+              Sign In
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-indigo-600 hover:text-indigo-500 font-medium transition duration-150"
+            >
+              Sign up
+            </Link>
+          </p>
         </div>
       </div>
-      <Button type="submit" loading={loading} fullWidth>
-        Sign in
-      </Button>
-      <p className="text-center text-sm">
-        Don't have an account?{" "}
-        <Link
-          to="/signup"
-          className="font-medium text-indigo-600 hover:text-indigo-500"
-        >
-          Sign up
-        </Link>
-      </p>
-    </form>
+    </div>
   );
 };
 

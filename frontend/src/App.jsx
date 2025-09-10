@@ -1,20 +1,12 @@
-// frontend/src/App.jsx
-
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
 import Layout from "./components/shared/Layout";
 import Spinner from "./components/shared/Spinner";
 import Dashboard from "./pages/Dashboard";
-import LoginPage from "./pages/LoginPage";
-import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./components/auth/LoginForm";
+import SignUpPage from "./components/auth/SignupForm";
 import UploadPage from "./pages/UploadPage";
 
-// PrivateRoute now correctly waits for both user and profile to be checked
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
 
@@ -29,7 +21,6 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
-// Public routes should also handle the loading state to prevent screen flicker
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
 
@@ -46,47 +37,43 @@ function PublicRoute({ children }) {
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <LoginPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <SignUpPage />
-              </PublicRoute>
-            }
-          />
-
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/upload"
-            element={
-              <PrivateRoute>
-                <UploadPage />
-              </PrivateRoute>
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <Layout>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <SignUpPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/upload"
+          element={
+            <PrivateRoute>
+              <UploadPage />
+            </PrivateRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </Layout>
   );
 }
 

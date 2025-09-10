@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import api from "../services/api";
 import toast from "react-hot-toast";
 import Button from "./shared/Button";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext"; // Import AuthContext
 
 const UploadForm = () => {
+  const { user } = useContext(AuthContext); // Access user context
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,10 +20,16 @@ const UploadForm = () => {
     }
   };
 
+  // frontend/src/components/UploadForm.jsx -> inside the UploadForm component
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
       toast.error("Please select a file to upload.");
+      return;
+    }
+    if (!user) {
+      toast.error("You must be logged in to upload files.");
       return;
     }
     setLoading(true);
@@ -30,9 +38,14 @@ const UploadForm = () => {
     formData.append("file", file);
 
     try {
+      // THE FIX IS HERE: The manual 'headers' object has been removed.
+      // api.js will now correctly add the auth token by itself.
       await api.post("/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
+
       toast.success("File uploaded and analyzed successfully!");
       navigate("/dashboard");
     } catch (error) {
@@ -61,7 +74,6 @@ const UploadForm = () => {
                 className="mx-auto h-40 w-40 object-cover rounded-md"
               />
             ) : (
-              // SVG Icon placeholder
               <svg
                 className="mx-auto h-12 w-12 text-gray-400"
                 stroke="currentColor"

@@ -1,17 +1,37 @@
 # backend/app/services/supabase_service.py
 
 import uuid
-from flask import current_app
+from flask import current_app,request
 
 def upload_image_to_storage(file, user_id):
-    """Uploads a file to Supabase storage and returns the public URL."""
-    supabase = current_app.supabase
-    file_extension = file.filename.split('.')[-1]
-    unique_filename = f"{user_id}/{uuid.uuid4()}.{file_extension}"
-    file.stream.seek(0)
-    supabase.storage.from_("scan_images").upload(unique_filename, file.read())
-    res = supabase.storage.from_("scan_images").get_public_url(unique_filename)
-    return res
+    try:
+        supabase = current_app.supabase
+
+        file_extension = file.filename.split('.')[-1]
+        unique_filename = f"{user_id}/{uuid.uuid4()}.{file_extension}"
+
+        file.stream.seek(0)
+
+        # Attach owner metadata
+        metadata = {
+            "owner": user_id
+        }
+
+        # Upload the file with metadata
+        supabase.storage.from_("scan_images").upload(
+            unique_filename,
+            file.read(),
+            {
+                "content-type": file.content_type,
+                "metadata": metadata
+            }
+        )
+
+        res = supabase.storage.from_("scan_images").get_public_url(unique_filename)
+        return res
+    except Exception as e:
+        print("Error in upload_image_to_storage:", e)
+        raise e
 
 def save_report_to_db(report_data):
     """Saves report metadata to the 'reports' table."""
