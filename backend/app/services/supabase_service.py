@@ -1,21 +1,15 @@
+# backend/app/services/supabase_service.py
+
 import uuid
 from flask import current_app
 
 def upload_image_to_storage(file, user_id):
     """Uploads a file to Supabase storage and returns the public URL."""
     supabase = current_app.supabase
-    
-    # Generate a unique file name to avoid conflicts
     file_extension = file.filename.split('.')[-1]
     unique_filename = f"{user_id}/{uuid.uuid4()}.{file_extension}"
-    
-    # Reset file stream position
     file.stream.seek(0)
-    
-    # Upload the file
     supabase.storage.from_("scan_images").upload(unique_filename, file.read())
-    
-    # Get the public URL
     res = supabase.storage.from_("scan_images").get_public_url(unique_filename)
     return res
 
@@ -34,10 +28,11 @@ def get_user_profile(user_id):
 def get_reports_from_db(user_id, role):
     """Fetches reports based on user role."""
     supabase = current_app.supabase
-    query = supabase.table('reports').select('*, profiles(full_name)').order('created_at', desc=True)
     
-    # Patients only see their own reports. This is also enforced by RLS,
-    # but filtering here is good practice.
+    # THE FIX IS HERE: Explicitly define the foreign key relationship
+    # This tells Supabase to use the 'patient_id' column to join with 'profiles'
+    query = supabase.table('reports').select('*, patient_id:profiles(full_name)').order('created_at', desc=True)
+    
     if role == 'Patient':
         query = query.eq('patient_id', user_id)
         

@@ -1,3 +1,5 @@
+// frontend/src/contexts/AuthContext.jsx
+
 import React, { createContext, useState, useEffect } from "react";
 import { supabase } from "../services/supabaseClient";
 
@@ -9,25 +11,59 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSession = async () => {
+    const fetchSessionAndProfile = async () => {
       const {
         data: { session },
+        error,
       } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      if (error) {
+        console.error("Error getting session:", error);
+        setLoading(false);
+        return;
+      }
+
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        setUser(session.user);
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("full_name, role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error(
+            "Error fetching profile on initial load:",
+            profileError.message
+          );
+        } else {
+          setProfile(profileData);
+        }
       }
       setLoading(false);
     };
 
-    fetchSession();
+    fetchSessionAndProfile();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        await fetchProfile(session.user.id);
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("full_name, role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error(
+            "Error fetching profile on auth change:",
+            profileError.message
+          );
+          setProfile(null);
+        } else {
+          setProfile(profileData);
+        }
       } else {
         setProfile(null);
       }
@@ -38,17 +74,6 @@ export const AuthProvider = ({ children }) => {
       subscription?.unsubscribe();
     };
   }, []);
-
-  const fetchProfile = async (userId) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("full_name, role")
-      .eq("id", userId)
-      .single();
-
-    if (error) console.error("Error fetching profile:", error);
-    setProfile(data);
-  };
 
   const value = {
     signUp: (email, password, metadata) =>
@@ -70,5 +95,9 @@ export const AuthProvider = ({ children }) => {
     loading,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 };

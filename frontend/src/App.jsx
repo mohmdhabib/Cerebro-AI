@@ -1,3 +1,5 @@
+// frontend/src/App.jsx
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,15 +14,34 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import UploadPage from "./pages/UploadPage";
 
+// PrivateRoute now correctly waits for both user and profile to be checked
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading)
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Spinner />
+        <Spinner size="lg" />
       </div>
     );
-  return user ? children : <Navigate to="/login" />;
+  }
+
+  return user ? children : <Navigate to="/login" replace />;
+}
+
+// Public routes should also handle the loading state to prevent screen flicker
+function PublicRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  return user ? <Navigate to="/dashboard" replace /> : children;
 }
 
 function App() {
@@ -28,8 +49,23 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <PublicRoute>
+                <SignUpPage />
+              </PublicRoute>
+            }
+          />
+
           <Route
             path="/dashboard"
             element={
@@ -46,7 +82,8 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Layout>
     </Router>

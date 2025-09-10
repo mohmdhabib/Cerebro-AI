@@ -13,6 +13,8 @@ const SignUpForm = () => {
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
+  // frontend/src/components/auth/SignUpForm.jsx -> inside the SignUpForm component
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -20,8 +22,9 @@ const SignUpForm = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Account created! Please check your email to verify.");
-      navigate("/login");
+      // THE FIX IS HERE: No longer navigate to login. The AuthContext will handle the redirect.
+      // We show a success toast and the onAuthStateChange listener will route to the dashboard.
+      toast.success("Account created successfully!");
     }
     setLoading(false);
   };
