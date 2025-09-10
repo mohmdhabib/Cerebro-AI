@@ -1,0 +1,7 @@
+Flask
+python-dotenv
+supabase
+Pillow
+tensorflow
+Flask-Cors
+gunicorn
