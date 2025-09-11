@@ -113,7 +113,7 @@ function App() {
         {/* Doctor-Specific Routes */}
         {profile?.role === "Doctor" && (
           <Route
-            path="/reports"
+            path="/dashboard"
             element={
               <PrivateRoute>
                 <AllReportsPage />
