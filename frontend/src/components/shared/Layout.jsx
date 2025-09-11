@@ -7,7 +7,6 @@ const Layout = ({ children }) => {
   const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -19,17 +18,13 @@ const Layout = ({ children }) => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
-
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
   };
 
   const sidebarItems = [
     {
-      name: "Dashboard",
+      name: "Home",
       href: "/dashboard",
       icon: (
         <svg
@@ -67,27 +62,27 @@ const Layout = ({ children }) => {
       ),
       showFor: "Patient",
     },
-    // {
-    //   name: "Reports",
-    //   href: "/history",
-    //   icon: (
-    //     <svg
-    //       className="w-5 h-5"
-    //       fill="none"
-    //       stroke="currentColor"
-    //       viewBox="0 0 24 24"
-    //     >
-    //       <path
-    //         strokeLinecap="round"
-    //         strokeLinejoin="round"
-    //         strokeWidth={2}
-    //         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-    //       />
-    //     </svg>
-    //   ),
-    // },
     {
-      name: "Patient History",
+      name: "Reports",
+      href: "/reports",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      ),
+    },
+    {
+      name: "History",
       href: "/history",
       icon: (
         <svg
@@ -105,9 +100,8 @@ const Layout = ({ children }) => {
         </svg>
       ),
     },
-
     {
-      name: "Settings",
+      name: "Profile",
       href: "/settings",
       icon: (
         <svg
@@ -120,13 +114,7 @@ const Layout = ({ children }) => {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-          />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           />
         </svg>
       ),
@@ -144,24 +132,24 @@ const Layout = ({ children }) => {
     className = "",
   }) => {
     const sizeClasses = {
-      sm: "w-8 h-8",
-      md: "w-10 h-10",
-      lg: "w-12 h-12",
+      sm: "w-8 h-8 text-xs",
+      md: "w-10 h-10 text-sm",
+      lg: "w-12 h-12 text-base",
     };
 
     return (
       <div className={`flex items-center space-x-3 ${className}`}>
         <div
-          className={`${sizeClasses[size]} bg-slate-700 rounded-full flex items-center justify-center shadow-sm`}
+          className={`${sizeClasses[size]} bg-gray-600 rounded-full flex items-center justify-center`}
         >
-          <span className="text-white font-semibold text-sm">
+          <span className="text-white font-semibold">
             {profile?.full_name
               ? profile.full_name
                   .split(" ")
                   .map((n) => n[0])
                   .join("")
                   .toUpperCase()
-              : "DR"}
+              : "AJ"}
           </span>
         </div>
 
@@ -169,12 +157,12 @@ const Layout = ({ children }) => {
           <div className="flex-1 min-w-0">
             {showName && (
               <div className="text-sm font-semibold text-gray-900 truncate">
-                {profile?.full_name || "Dr. Evelyn Reed"}
+                {profile?.full_name || "Alex Johnson"}
               </div>
             )}
             {showRole && (
-              <div className="text-xs text-gray-500 capitalize truncate">
-                {profile?.role || "Neurologist"}
+              <div className="text-xs text-gray-500 truncate">
+                Patient ID: {profile?.patient_id || "P38-982"}
               </div>
             )}
           </div>
@@ -185,14 +173,11 @@ const Layout = ({ children }) => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-            <Link
-              to="/dashboard"
-              className="flex items-center space-x-3 text-2xl font-bold text-slate-800"
-            >
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+      <div className="min-h-screen flex flex-col bg-white">
+        <header className="bg-white shadow-sm">
+          <nav className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <Link to="/dashboard" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-white"
                   fill="none"
@@ -207,18 +192,20 @@ const Layout = ({ children }) => {
                   />
                 </svg>
               </div>
-              <span>NeuroScan</span>
+              <span className="text-2xl font-bold text-gray-900">
+                NeuroScan
+              </span>
             </Link>
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
               <Link
                 to="/login"
-                className="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200"
+                className="px-4 py-2 text-gray-600 hover:text-teal-600 font-medium"
               >
-                Login
+                Sign In
               </Link>
               <Link to="/signup">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
-                  Sign Up
+                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-medium">
+                  Get Started
                 </Button>
               </Link>
             </div>
@@ -229,35 +216,102 @@ const Layout = ({ children }) => {
     );
   }
 
+  const getCurrentPageTitle = () => {
+    const currentRoute = sidebarItems.find(
+      (item) => item.href === location.pathname
+    );
+    return currentRoute ? currentRoute.name : "Dashboard";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <div
-          className="fixed inset-0 bg-gray-600 bg-opacity-75 z-40 lg:hidden"
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 lg:hidden"
           onClick={toggleMobileSidebar}
         ></div>
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 bg-white shadow-xl transition-all duration-300 border-r border-gray-200 ${
-          isSidebarCollapsed ? "w-20" : "w-72"
-        } ${
+        className={`fixed inset-y-0 left-0 z-50 w-60 bg-white shadow-sm transition-transform duration-300 ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 lg:static lg:inset-0`}
       >
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
-          <Link
-            to="/dashboard"
-            className={`flex items-center space-x-3 text-xl font-bold text-slate-800 transition-all duration-300 ${
-              isSidebarCollapsed ? "justify-center" : ""
-            }`}
-          >
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+        {/* Logo Section */}
+        <div className="h-20 flex items-center px-6 border-b border-gray-100">
+          <Link to="/dashboard" className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">N</span>
+            </div>
+            <div>
+              <span className="text-lg font-bold text-gray-900">NeuroScan</span>
+              <p className="text-xs text-gray-500">Patient Portal</p>
+            </div>
+          </Link>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4 py-6">
+          <div className="space-y-1">
+            {sidebarItems.map((item, index) => {
+              if (item.showFor && profile?.role !== item.showFor) return null;
+
+              const isActive = isActiveRoute(item.href);
+
+              return (
+                <Link
+                  key={index}
+                  to={item.href}
+                  className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                    isActive
+                      ? "bg-teal-50 text-teal-700"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                >
+                  <span
+                    className={`flex-shrink-0 ${
+                      isActive ? "text-teal-600" : "text-gray-400"
+                    }`}
+                  >
+                    {item.icon}
+                  </span>
+                  <span className="ml-3">{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Help Section */}
+        <div className="px-4 py-6 border-t border-gray-100">
+          <div className="bg-teal-50 rounded-lg p-4 text-center">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">
+              Need Help?
+            </h4>
+            <p className="text-xs text-gray-600 mb-3">
+              Our support team is here for you.
+            </p>
+            <button className="w-full px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium rounded-lg transition-colors">
+              Contact Support
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="h-20 bg-white shadow-sm flex items-center justify-between px-8 border-b border-gray-100">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleMobileSidebar}
+              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
+            >
               <svg
-                className="w-6 h-6 text-white"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -266,194 +320,77 @@ const Layout = ({ children }) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {getCurrentPageTitle()}
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                {location.pathname === "/dashboard" &&
+                  "Your health journey is our priority. Here's a summary of your recent activity."}
+                {location.pathname === "/upload" &&
+                  "Upload your medical scans for AI-powered analysis and insights."}
+                {location.pathname === "/reports" &&
+                  "View and manage all your medical reports and scan results."}
+                {location.pathname === "/history" &&
+                  "Track your complete medical history and treatment progress."}
+                {location.pathname === "/settings" &&
+                  "Manage your account settings and personal information."}
+              </p>
             </div>
-            {!isSidebarCollapsed && <span>NeuroScan</span>}
-          </Link>
+          </div>
 
-          <button
-            onClick={toggleSidebar}
-            className="hidden lg:block p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isSidebarCollapsed ? (
+          <div className="flex items-center space-x-4">
+            {/* Notification Bell */}
+            <button className="p-2 text-gray-400 hover:text-gray-600 relative">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 5l7 7-7 7"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                 />
-              ) : (
+              </svg>
+            </button>
+
+            {/* User Profile */}
+            <UserAvatar size="sm" showName={true} showRole={true} />
+
+            {/* Sign Out Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                 />
-              )}
-            </svg>
-          </button>
-        </div>
-
-        {/* User Profile Section in Sidebar */}
-        <div
-          className={`px-6 py-4 border-b border-gray-200 ${
-            isSidebarCollapsed ? "text-center" : ""
-          }`}
-        >
-          <UserAvatar
-            size="lg"
-            showName={!isSidebarCollapsed}
-            showRole={!isSidebarCollapsed}
-            className={isSidebarCollapsed ? "justify-center" : ""}
-          />
-          {!isSidebarCollapsed && (
-            <div className="mt-2">
-              <div className="flex items-center text-xs text-gray-500">
-                <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                Online
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          {sidebarItems.map((item, index) => {
-            if (item.showFor && profile?.role !== item.showFor) return null;
-
-            const isActive = isActiveRoute(item.href);
-
-            return (
-              <Link
-                key={index}
-                to={item.href}
-                className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 group relative ${
-                  isActive
-                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-600"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                } ${isSidebarCollapsed ? "justify-center px-2" : "space-x-3"}`}
-                onClick={() => setIsMobileSidebarOpen(false)}
-              >
-                <span className="flex-shrink-0">{item.icon}</span>
-                {!isSidebarCollapsed && <span>{item.name}</span>}
-                {isSidebarCollapsed && (
-                  <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
-                    {item.name}
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Logout Button in Sidebar */}
-        <div className="px-4 py-4 border-t border-gray-200">
-          <button
-            onClick={handleLogout}
-            className={`w-full flex items-center px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 group ${
-              isSidebarCollapsed ? "justify-center px-2" : "space-x-3"
-            }`}
-          >
-            <svg
-              className="w-5 h-5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            {!isSidebarCollapsed && <span>Logout</span>}
-            {isSidebarCollapsed && (
-              <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-lg">
-                Logout
-              </div>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Top Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={toggleMobileSidebar}
-                className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              </button>
-
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Brain Tumor Detection Dashboard
-                </h1>
-                <p className="text-sm text-gray-500">
-                  AI-powered medical imaging analysis
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-6">
-              {/* Search Bar */}
-       
-
-              {/* Notifications */}
-            
-
-              {/* User Profile in Header */}
-              <div className="flex items-center space-x-3 border-l border-gray-200 pl-6">
-                <UserAvatar size="md" showName={true} showRole={true} />
-
-                {/* User Menu Dropdown Button */}
-                <button className="p-1 rounded-lg text-gray-400 hover:text-gray-600 transition-colors duration-200">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
+              </svg>
+              Sign Out
+            </button>
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto p-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto">{children}</div>
+        </main>
       </div>
     </div>
   );

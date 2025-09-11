@@ -4,87 +4,148 @@ import React, { useState } from "react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import Spinner from "../shared/Spinner";
+import api from "../../services/api";
 
-const Icon = ({ path, className = "h-4 w-4" }) => (
+const Icon = ({ path, className = "h-5 w-5" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className={className}
     fill="none"
-    viewBox="0 0 24"
+    viewBox="0 0 24 24"
     stroke="currentColor"
-    strokeWidth={2}
+    strokeWidth={1.5}
   >
     <path strokeLinecap="round" strokeLinejoin="round" d={path} />
   </svg>
 );
 
-const ResultCard = ({ report, patientView = true }) => {
-  const { prediction, confidence, created_at, patient_name } = report;
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isSharing, setIsSharing] = useState(false);
+const DetailItem = ({ icon, label, value }) => {
+  if (value === null || value === undefined || value === "") return null;
+  return (
+    <div className="flex items-center text-sm py-1">
+      <div className="flex-shrink-0 w-6 text-slate-500">{icon}</div>
+      <span className="text-slate-600 font-medium mr-2">{label}:</span>
+      <span className="text-slate-800 font-semibold truncate">
+        {String(value)}
+      </span>
+    </div>
+  );
+};
+
+const ResultCard = ({ report }) => {
+  const {
+    image_url,
+    prediction,
+    confidence,
+    created_at,
+    patient_name,
+    location,
+    size_length_cm,
+    size_width_cm,
+    edema_present,
+    contrast_pattern,
+    tumor_grade,
+  } = report;
+
+  const [isProcessing, setIsProcessing] = useState(false);
   const confidencePercentage = (confidence * 100).toFixed(1);
   const isTumor = prediction && prediction.toLowerCase() !== "no tumor";
 
-  // --- HELPER FUNCTION TO GENERATE THE PDF BLOB ---
-  const generatePdfBlob = () => {
+  const generatePdfBlob = async () => {
     const pdf = new jsPDF("p", "mm", "a4");
     const reportDate = format(new Date(), "PPP");
     const pageWidth = pdf.internal.pageSize.getWidth();
 
-    // Header
+    // --- Header ---
     pdf.setFillColor(79, 70, 229);
-    pdf.rect(0, 0, pageWidth, 30, "F");
-    pdf.setFontSize(22);
+    pdf.rect(0, 0, pageWidth, 25, "F");
+    pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor("#FFFFFF");
-    pdf.text("BrainScan AI - Analysis Report", pageWidth / 2, 18, {
+    pdf.text("BrainScan AI - Analysis Report", pageWidth / 2, 16, {
       align: "center",
     });
 
-    // Patient & Scan Details
-    pdf.setFontSize(12);
-    pdf.setFont("helvetica", "normal");
+    // --- Patient & Scan Details ---
+    pdf.setFontSize(11);
     pdf.setTextColor("#000000");
-    pdf.text(`Patient Name:`, 20, 50);
     pdf.setFont("helvetica", "bold");
-    pdf.text(patient_name || "N/A", 55, 50);
+    pdf.text("Patient Information", 15, 40);
     pdf.setFont("helvetica", "normal");
-    pdf.text(`Scan Date:`, 20, 60);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(format(new Date(created_at), "PPP"), 55, 60);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`Report Generated:`, 110, 50);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(reportDate, 150, 50);
+    pdf.text(`Name: ${patient_name || "N/A"}`, 15, 48);
+    pdf.text(`Scan Date: ${format(new Date(created_at), "PPP")}`, 15, 54);
+    pdf.text(`Report Generated: ${reportDate}`, 105, 48);
+    pdf.text(`Report ID: ${report.id}`, 105, 54);
 
-    // Analysis Results Box
-    pdf.setDrawColor(229, 231, 235);
-    pdf.setLineWidth(0.5);
-    pdf.roundedRect(15, 75, pageWidth - 30, 40, 3, 3, "S");
-    pdf.setFontSize(16);
+    // --- AI & Clinical Findings ---
     pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(79, 70, 229);
-    pdf.text("Analysis Results", 25, 88);
-    pdf.setFontSize(14);
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor("#000000");
-    pdf.text("Prediction:", 90, 88);
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(isTumor ? "#DC2626" : "#16A34A");
-    pdf.text(prediction || "N/A", 125, 88);
-    pdf.setTextColor("#000000");
-    pdf.text("Confidence:", 90, 98);
-    pdf.setFont("helvetica", "bold");
-    pdf.text(`${confidencePercentage}%`, 125, 98);
+    pdf.text("Key Findings", 15, 70);
 
-    // Footer & Disclaimer
+    let yPosition = 78;
+    const addDetail = (label, value) => {
+      if (value !== null && value !== undefined && value !== "") {
+        pdf.setFont("helvetica", "bold");
+        pdf.text(`${label}:`, 20, yPosition);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(String(value), 60, yPosition);
+        yPosition += 6;
+      }
+    };
+
+    addDetail("AI Prediction", prediction);
+    addDetail("Confidence", `${confidencePercentage}%`);
+    addDetail("Tumor Grade", tumor_grade);
+    addDetail("Location", location);
+    addDetail(
+      "Size",
+      size_length_cm && size_width_cm
+        ? `${size_length_cm}cm x ${size_width_cm}cm`
+        : null
+    );
+    addDetail("Contrast Pattern", contrast_pattern);
+    addDetail("Edema", edema_present ? "Present" : "Not Present");
+
+    // --- Image Section ---
+    if (image_url) {
+      try {
+        const imagePath = image_url.split("/scan_images/")[1].split("?")[0];
+        const response = await api.get(`/image-proxy/${imagePath}`, {
+          responseType: "blob",
+        });
+        const localImageUrl = URL.createObjectURL(response.data);
+
+        const imageElement = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.src = localImageUrl;
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+        });
+
+        const canvas = await html2canvas(imageElement);
+        const imageData = canvas.toDataURL("image/jpeg", 0.8);
+
+        pdf.addPage();
+        pdf.setFontSize(16);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Uploaded MRI Scan", pageWidth / 2, 20, { align: "center" });
+        pdf.addImage(imageData, "JPEG", 15, 30, 180, 160);
+        URL.revokeObjectURL(localImageUrl);
+      } catch (error) {
+        console.error("Could not add image to PDF:", error);
+        toast.error("Could not add image to PDF.");
+      }
+    }
+
+    // --- Footer ---
+    pdf.setPage(1); // Return to the first page to draw the footer
     pdf.setLineWidth(0.2);
     pdf.line(15, 270, pageWidth - 15, 270);
     pdf.setFontSize(8);
     pdf.setTextColor("#808080");
     pdf.text(
-      "Disclaimer: This is an AI-generated report...",
+      "Disclaimer: This is an AI-generated report and requires review by a qualified medical professional.",
       pageWidth / 2,
       280,
       { align: "center", maxWidth: pageWidth - 30 }
@@ -93,52 +154,34 @@ const ResultCard = ({ report, patientView = true }) => {
     return pdf.output("blob");
   };
 
-  // --- UPGRADED SHARE FUNCTIONALITY ---
   const handleShare = async () => {
-    setIsSharing(true);
-    const toastId = toast.loading("Preparing to share...");
-
+    setIsProcessing(true);
+    const toastId = toast.loading("Preparing PDF to share...");
     try {
-      const pdfBlob = generatePdfBlob();
+      const pdfBlob = await generatePdfBlob();
       const fileName = `BrainScan-Report-${report.id}.pdf`;
       const pdfFile = new File([pdfBlob], fileName, {
         type: "application/pdf",
       });
 
-      const shareData = {
-        files: [pdfFile],
-        title: "Brain Scan Report",
-        text: `Here is the AI analysis report for ${
-          patient_name || "the patient"
-        }.`,
-      };
-
-      // Check if the browser can share these files
       if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-        await navigator.share(shareData);
-        toast.success("Report shared successfully!");
+        await navigator.share({ files: [pdfFile], title: "Brain Scan Report" });
       } else {
-        // Fallback for browsers that can't share files
-        throw new Error("File sharing not supported.");
+        throw new Error("File sharing not supported by your browser.");
       }
     } catch (error) {
-      // Fallback to copying text if file sharing fails or is not supported
-      const shareText = `BrainScan AI Report\n- Prediction: ${prediction}\n- Confidence: ${confidencePercentage}%`;
-      await navigator.clipboard.writeText(shareText);
-      toast.success(
-        "File sharing not available. Report details copied to clipboard!"
-      );
+      toast.error(error.message || "Could not share PDF.");
     } finally {
       toast.dismiss(toastId);
-      setIsSharing(false);
+      setIsProcessing(false);
     }
   };
 
-  // --- DOWNLOAD FUNCTIONALITY ---
-  const handleDownloadPdf = () => {
-    setIsDownloading(true);
+  const handleDownloadPdf = async () => {
+    setIsProcessing(true);
+    const toastId = toast.loading("Generating PDF report...");
     try {
-      const pdfBlob = generatePdfBlob();
+      const pdfBlob = await generatePdfBlob();
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
@@ -147,11 +190,11 @@ const ResultCard = ({ report, patientView = true }) => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      toast.success("Download started!");
     } catch (error) {
       toast.error("Could not generate PDF.");
     } finally {
-      setIsDownloading(false);
+      toast.dismiss(toastId);
+      setIsProcessing(false);
     }
   };
 
@@ -163,21 +206,70 @@ const ResultCard = ({ report, patientView = true }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-      {/* ... (UI part of the card remains the same) ... */}
+      <div className="relative">
+        <img
+          src={
+            image_url ||
+            "https://via.placeholder.com/400x300?text=Image+Not+Available"
+          }
+          alt="MRI Scan"
+          className="w-full h-56 object-cover"
+        />
+        <div
+          className={`absolute top-3 right-3 px-3 py-1 text-sm font-bold text-white rounded-full flex items-center gap-2 ${
+            isTumor ? "bg-red-500/90" : "bg-green-500/90"
+          }`}
+        >
+          <Icon
+            path={
+              isTumor
+                ? "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                : "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            }
+          />
+          <span>{prediction || "N/A"}</span>
+        </div>
+      </div>
       <div className="p-5 flex-grow flex flex-col">
-        <div className="flex justify-between items-start text-sm text-gray-500 mb-4">
-          {!patientView && (
-            <div className="flex items-center gap-2 font-semibold text-gray-700 truncate">
-              <Icon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              <span className="truncate">
-                {patient_name || "Unknown Patient"}
-              </span>
-            </div>
-          )}
-          <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-            <Icon path="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <div className="flex justify-between items-start text-sm text-slate-500 mb-4">
+          <div className="flex items-center gap-2 font-semibold text-slate-700 truncate">
+            <Icon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <span className="truncate">
+              {patient_name || "Unknown Patient"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 ml-auto flex-shrink-0">
+            <Icon
+              path="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              className="h-4 w-4"
+            />
             <span>{format(new Date(created_at), "PPP")}</span>
           </div>
+        </div>
+        <div className="space-y-2 border-t border-b border-gray-100 py-4 mb-4">
+          <DetailItem
+            icon={<Icon path="M9 17v-2a4 4 0 00-4-4H3V7h2a4 4 0 004-4V3" />}
+            label="Grade"
+            value={tumor_grade}
+          />
+          <DetailItem
+            icon={
+              <Icon path="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M12 11a3 3 0 100-6 3 3 0 000 6z" />
+            }
+            label="Location"
+            value={location}
+          />
+          <DetailItem
+            icon={
+              <Icon path="M14 10H3v2h11v-2zm7-4H3v2h18V6zM10 14H3v2h7v-2z" />
+            }
+            label="Size"
+            value={
+              size_length_cm && size_width_cm
+                ? `${size_length_cm}cm x ${size_width_cm}cm`
+                : null
+            }
+          />
         </div>
         <div className="mt-auto">
           <div className="flex justify-between mb-1">
@@ -205,27 +297,33 @@ const ResultCard = ({ report, patientView = true }) => {
         <div className="flex justify-end space-x-3">
           <button
             onClick={handleShare}
-            disabled={isSharing || isDownloading}
-            className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isProcessing}
+            className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50"
           >
-            {isSharing ? (
+            {isProcessing ? (
               <Spinner size="sm" />
             ) : (
-              <Icon path="M8.684 13.342c.886-.404 1.5-1.048 1.5-1.842s-.614-1.438-1.5-1.842m.01 3.684a2.986 2.986 0 010-3.684m0 3.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+              <Icon
+                path="M8.684 13.342c.886-.404 1.5-1.048 1.5-1.842s-.614-1.438-1.5-1.842m.01 3.684a2.986 2.986 0 010-3.684m0 3.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367-2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                className="h-4 w-4"
+              />
             )}
-            {isSharing ? "Sharing..." : "Share"}
+            Share
           </button>
           <button
             onClick={handleDownloadPdf}
-            disabled={isDownloading || isSharing}
-            className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isProcessing}
+            className="inline-flex items-center gap-2 px-3 py-1 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 disabled:opacity-50"
           >
-            {isDownloading ? (
+            {isProcessing ? (
               <Spinner size="sm" />
             ) : (
-              <Icon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              <Icon
+                path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                className="h-4 w-4"
+              />
             )}
-            {isDownloading ? "Downloading..." : "Download PDF"}
+            {isProcessing ? "Processing..." : "Download PDF"}
           </button>
         </div>
       </div>

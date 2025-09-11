@@ -14,13 +14,26 @@ const SignUpForm = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("Patient");
+  const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (!agreeToTerms) {
+      toast.error("Please agree to the Terms of Service and Privacy Policy");
+      return;
+    }
+
     setLoading(true);
     const { error } = await signUp(email, password, { fullName, role });
     if (error) {
@@ -33,97 +46,110 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-purple-100 p-4 sm:p-8">
-      <div className="flex flex-col md:flex-row w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden">
-        {/* Left Side - Decorative Image/Illustration */}
-        <div className="hidden md:flex flex-1 items-center justify-center p-12 bg-indigo-600 relative">
-          <div className="absolute inset-0 z-0 bg-pattern opacity-10"></div>
-          <div className="z-10 text-center">
-            <h1 className="text-white text-4xl font-extrabold mb-4">
-              Join Our Community
-            </h1>
-            <p className="text-indigo-200 text-lg">
-              Sign up today to connect with healthcare professionals and manage
-              your health journey.
-            </p>
-            <img
-              src="https://img.freepik.com/premium-vector/mobile-login-concept-illustration_114360-83.jpg"
-              alt="Healthcare illustration"
-              className="mt-8 w-full max-w-sm mx-auto"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+      {/* Header */}
+      <div className="flex items-center justify-between px-8 py-6">
+        <div className="flex items-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-teal-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+            <div className="w-5 h-5 bg-white rounded-md opacity-90"></div>
           </div>
+          <h1 className="text-2xl font-bold text-gray-800">NeuroScan</h1>
         </div>
+        <Link
+          to="/login"
+          className="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+        >
+          Log In
+        </Link>
+      </div>
 
-        {/* Right Side - The Sign-Up Form */}
-        <div className="flex-1 p-8 sm:p-12 lg:p-16">
-          <div className="max-w-md mx-auto">
-            <h2 className="text-4xl font-bold text-center text-gray-800 mb-2">
-              Get Started
+      {/* Main Content */}
+      <div className="flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
+          {/* Title Section */}
+          <div className="text-center mb-10">
+            <h2 className="text-4xl font-bold text-gray-900 mb-3">
+              Create your account
             </h2>
-            <p className="text-center text-gray-500 mb-8">
-              Create your account in seconds.
+            <p className="text-lg text-gray-600">
+              Join NeuroScan to get insights about your brain health.
             </p>
+          </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Full Name Input with Icon */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-400">
-                  <HiOutlineUser className="h-5 w-5" />
-                </div>
+          {/* Form Container */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            <form onSubmit={handleSubmit} className="space-y-7">
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Full Name
+                </label>
                 <input
-                  name="fullName"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                  placeholder="Full Name"
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  placeholder="Enter your full name"
                 />
               </div>
 
-              {/* Email Input with Icon */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-400">
-                  <HiOutlineMail className="h-5 w-5" />
-                </div>
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email address
+                </label>
                 <input
-                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                  placeholder="Email address"
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  placeholder="Enter your email"
                 />
               </div>
 
-              {/* Password Input with Icon */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-400">
-                  <HiOutlineLockClosed className="h-5 w-5" />
-                </div>
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password
+                </label>
                 <input
-                  name="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                  placeholder="Password"
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  placeholder="Create a password"
                 />
               </div>
 
-              {/* Role Selection - Card-style radio buttons */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  placeholder="Confirm your password"
+                />
+              </div>
+
+              {/* Role Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
                   I am a:
                 </label>
-                <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="grid grid-cols-2 gap-4">
                   <label
-                    className={`flex-1 flex items-center justify-center p-4 border rounded-xl cursor-pointer transition-all duration-300 relative ${
+                    className={`relative flex items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
                       role === "Patient"
-                        ? "bg-indigo-50 border-indigo-500 shadow-md scale-105"
-                        : "bg-gray-50 border-gray-300 hover:bg-gray-100"
+                        ? "bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-300 shadow-md"
+                        : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                     }`}
                   >
                     <input
@@ -134,17 +160,28 @@ const SignUpForm = () => {
                       onChange={(e) => setRole(e.target.value)}
                       className="hidden"
                     />
-                    <FaUser className="h-6 w-6 text-indigo-600 mr-2" />
-                    <span className="font-semibold text-gray-700">Patient</span>
+                    <FaUser
+                      className={`h-5 w-5 mr-2 ${
+                        role === "Patient" ? "text-cyan-600" : "text-gray-500"
+                      }`}
+                    />
+                    <span
+                      className={`font-semibold ${
+                        role === "Patient" ? "text-cyan-800" : "text-gray-700"
+                      }`}
+                    >
+                      Patient
+                    </span>
                     {role === "Patient" && (
-                      <FaCheckCircle className="absolute top-2 right-2 text-indigo-500 h-5 w-5" />
+                      <FaCheckCircle className="absolute top-2 right-2 text-cyan-500 h-5 w-5" />
                     )}
                   </label>
+
                   <label
-                    className={`flex-1 flex items-center justify-center p-4 border rounded-xl cursor-pointer transition-all duration-300 relative ${
+                    className={`relative flex items-center justify-center p-5 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
                       role === "Doctor"
-                        ? "bg-indigo-50 border-indigo-500 shadow-md scale-105"
-                        : "bg-gray-50 border-gray-300 hover:bg-gray-100"
+                        ? "bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-300 shadow-md"
+                        : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                     }`}
                   >
                     <input
@@ -155,29 +192,76 @@ const SignUpForm = () => {
                       onChange={(e) => setRole(e.target.value)}
                       className="hidden"
                     />
-                    <FaUserMd className="h-6 w-6 text-indigo-600 mr-2" />
-                    <span className="font-semibold text-gray-700">Doctor</span>
+                    <FaUserMd
+                      className={`h-5 w-5 mr-2 ${
+                        role === "Doctor" ? "text-cyan-600" : "text-gray-500"
+                      }`}
+                    />
+                    <span
+                      className={`font-semibold ${
+                        role === "Doctor" ? "text-cyan-800" : "text-gray-700"
+                      }`}
+                    >
+                      Doctor
+                    </span>
                     {role === "Doctor" && (
-                      <FaCheckCircle className="absolute top-2 right-2 text-indigo-500 h-5 w-5" />
+                      <FaCheckCircle className="absolute top-2 right-2 text-cyan-500 h-5 w-5" />
                     )}
                   </label>
                 </div>
               </div>
 
-              <Button type="submit" loading={loading} fullWidth>
-                Sign up
-              </Button>
+              {/* Terms Checkbox */}
+              <div className="flex items-start space-x-3">
+                <div className="flex items-center h-5">
+                  <input
+                    id="agreeToTerms"
+                    type="checkbox"
+                    checked={agreeToTerms}
+                    onChange={(e) => setAgreeToTerms(e.target.checked)}
+                    className="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 focus:ring-2"
+                  />
+                </div>
+                <label
+                  htmlFor="agreeToTerms"
+                  className="text-sm text-gray-600 leading-5"
+                >
+                  I agree to the{" "}
+                  <a
+                    href="#"
+                    className="text-cyan-600 hover:text-cyan-700 font-medium"
+                  >
+                    Terms of Service and Privacy Policy
+                  </a>
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform ${
+                  loading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 hover:scale-105 shadow-lg hover:shadow-xl"
+                }`}
+              >
+                {loading ? "Creating Account..." : "Sign Up"}
+              </button>
             </form>
 
-            <p className="mt-8 text-center text-sm text-gray-500">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-150"
-              >
-                Sign in
-              </Link>
-            </p>
+            {/* Login Link */}
+            <div className="mt-8 text-center">
+              <p className="text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-cyan-600 hover:text-cyan-700 font-semibold transition-colors duration-200"
+                >
+                  Log in
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
