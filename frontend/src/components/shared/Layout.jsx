@@ -80,6 +80,7 @@ const Layout = ({ children }) => {
           />
         </svg>
       ),
+      hideFor: "Patient",
     },
     {
       name: "History",
@@ -99,6 +100,7 @@ const Layout = ({ children }) => {
           />
         </svg>
       ),
+      hideFor: "Doctor",
     },
     {
       name: "Profile",
@@ -160,11 +162,6 @@ const Layout = ({ children }) => {
                 {profile?.full_name || "Alex Johnson"}
               </div>
             )}
-            {showRole && (
-              <div className="text-xs text-gray-500 truncate">
-                Patient ID: {profile?.patient_id || "P38-982"}
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -177,7 +174,7 @@ const Layout = ({ children }) => {
         <header className="bg-white shadow-sm">
           <nav className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <Link to="/dashboard" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-teal-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-white"
                   fill="none"
@@ -199,12 +196,12 @@ const Layout = ({ children }) => {
             <div className="flex items-center space-x-4">
               <Link
                 to="/login"
-                className="px-4 py-2 text-gray-600 hover:text-teal-600 font-medium"
+                className="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium"
               >
                 Sign In
               </Link>
               <Link to="/signup">
-                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-medium">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
                   Get Started
                 </Button>
               </Link>
@@ -242,7 +239,7 @@ const Layout = ({ children }) => {
         {/* Logo Section */}
         <div className="h-20 flex items-center px-6 border-b border-gray-100">
           <Link to="/dashboard" className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">N</span>
             </div>
             <div>
@@ -257,6 +254,7 @@ const Layout = ({ children }) => {
           <div className="space-y-1">
             {sidebarItems.map((item, index) => {
               if (item.showFor && profile?.role !== item.showFor) return null;
+              if (item.hideFor && profile?.role === item.hideFor) return null;
 
               const isActive = isActiveRoute(item.href);
 
@@ -266,14 +264,14 @@ const Layout = ({ children }) => {
                   to={item.href}
                   className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${
                     isActive
-                      ? "bg-teal-50 text-teal-700"
+                      ? "bg-blue-50 text-blue-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                   onClick={() => setIsMobileSidebarOpen(false)}
                 >
                   <span
                     className={`flex-shrink-0 ${
-                      isActive ? "text-teal-600" : "text-gray-400"
+                      isActive ? "text-blue-600" : "text-gray-400"
                     }`}
                   >
                     {item.icon}
@@ -286,19 +284,26 @@ const Layout = ({ children }) => {
         </nav>
 
         {/* Help Section */}
-        <div className="px-4 py-6 border-t border-gray-100">
-          <div className="bg-teal-50 rounded-lg p-4 text-center">
-            <h4 className="text-sm font-semibold text-gray-900 mb-2">
-              Need Help?
-            </h4>
-            <p className="text-xs text-gray-600 mb-3">
-              Our support team is here for you.
-            </p>
-            <button className="w-full px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium rounded-lg transition-colors">
-              Contact Support
-            </button>
-          </div>
-        </div>
+        {/* Sign Out Button */}
+        <button
+          onClick={handleLogout}
+          className="flex ml-5 items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        >
+          <svg
+            className="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          Sign Out
+        </button>
       </div>
 
       {/* Main Content */}

@@ -1,20 +1,18 @@
 from functools import wraps
-from flask import request, g, current_app, jsonify
+from fastapi import Depends, HTTPException, status, Request
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-def token_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        auth_header = request.headers.get('Authorization')
-        if not auth_header:
-            return jsonify({"error": "Authorization header missing"}), 401
-        
-        try:
-            # The token is expected to be 'Bearer <your-jwt>'
-            jwt_token = auth_header.split(" ")[1]
-            user_response = current_app.supabase.auth.get_user(jwt_token)
-            g.user = user_response.user
-        except Exception as e:
-            return jsonify({"error": "Invalid token", "details": str(e)}), 401
-        
-        return f(*args, **kwargs)
-    return decorated_function
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), request: Request = None):
+    try:
+        # The token is expected to be 'Bearer <your-jwt>'
+        jwt_token = credentials.credentials
+        user_response = request.app.state.supabase.auth.get_user(jwt_token)
+        return user_response.user
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid token: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

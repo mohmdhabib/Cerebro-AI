@@ -16,7 +16,7 @@ const SignUpForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("Patient");
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  // const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -29,10 +29,10 @@ const SignUpForm = () => {
       return;
     }
 
-    if (!agreeToTerms) {
-      toast.error("Please agree to the Terms of Service and Privacy Policy");
-      return;
-    }
+    // if (!agreeToTerms) {
+    //   toast.error("Please agree to the Terms of Service and Privacy Policy");
+    //   return;
+    // }
 
     setLoading(true);
     const { error } = await signUp(email, password, { fullName, role });
@@ -46,18 +46,18 @@ const SignUpForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center">
-          <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-teal-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
             <div className="w-5 h-5 bg-white rounded-md opacity-90"></div>
           </div>
           <h1 className="text-2xl font-bold text-gray-800">NeuroScan</h1>
         </div>
         <Link
           to="/login"
-          className="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200"
+          className="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 border shadow-md p-2 rounded"
         >
           Log In
         </Link>
@@ -89,7 +89,7 @@ const SignUpForm = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  className="w-full px-4 py-4 bg-gray-50 border border-blue-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -104,7 +104,7 @@ const SignUpForm = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  className="w-full px-4 py-4 bg-gray-50 border border-blue-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200"
                   placeholder="Enter your email"
                 />
               </div>
@@ -119,7 +119,7 @@ const SignUpForm = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  className="w-full px-4 py-4 bg-gray-50 border border-blue-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200"
                   placeholder="Create a password"
                 />
               </div>
@@ -134,7 +134,7 @@ const SignUpForm = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  className="w-full px-4 py-4 bg-gray-50 border border-blue-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200"
                   placeholder="Confirm your password"
                 />
               </div>
@@ -148,7 +148,7 @@ const SignUpForm = () => {
                   <label
                     className={`relative flex items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
                       role === "Patient"
-                        ? "bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-300 shadow-md"
+                        ? "bg-gradient-to-r from-cyan-50 to-blue-50 border-indigo-300 shadow-md"
                         : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                     }`}
                   >
@@ -162,25 +162,25 @@ const SignUpForm = () => {
                     />
                     <FaUser
                       className={`h-5 w-5 mr-2 ${
-                        role === "Patient" ? "text-cyan-600" : "text-gray-500"
+                        role === "Patient" ? "text-blue-600" : "text-gray-500"
                       }`}
                     />
                     <span
                       className={`font-semibold ${
-                        role === "Patient" ? "text-cyan-800" : "text-gray-700"
+                        role === "Patient" ? "text-blue-800" : "text-gray-700"
                       }`}
                     >
                       Patient
                     </span>
                     {role === "Patient" && (
-                      <FaCheckCircle className="absolute top-2 right-2 text-cyan-500 h-5 w-5" />
+                      <FaCheckCircle className="absolute top-2 right-2 text-blue-500 h-5 w-5" />
                     )}
                   </label>
 
                   <label
                     className={`relative flex items-center justify-center p-5 rounded-xl cursor-pointer transition-all duration-300 border-2 ${
                       role === "Doctor"
-                        ? "bg-gradient-to-r from-cyan-50 to-teal-50 border-cyan-300 shadow-md"
+                        ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-300 shadow-md"
                         : "bg-gray-50 border-gray-200 hover:bg-gray-100"
                     }`}
                   >
@@ -194,32 +194,32 @@ const SignUpForm = () => {
                     />
                     <FaUserMd
                       className={`h-5 w-5 mr-2 ${
-                        role === "Doctor" ? "text-cyan-600" : "text-gray-500"
+                        role === "Doctor" ? "text-blue-600" : "text-gray-500"
                       }`}
                     />
                     <span
                       className={`font-semibold ${
-                        role === "Doctor" ? "text-cyan-800" : "text-gray-700"
+                        role === "Doctor" ? "text-blue-800" : "text-gray-700"
                       }`}
                     >
                       Doctor
                     </span>
                     {role === "Doctor" && (
-                      <FaCheckCircle className="absolute top-2 right-2 text-cyan-500 h-5 w-5" />
+                      <FaCheckCircle className="absolute top-2 right-2 text-blue-500 h-5 w-5" />
                     )}
                   </label>
                 </div>
               </div>
 
               {/* Terms Checkbox */}
-              <div className="flex items-start space-x-3">
+              {/* <div className="flex items-start space-x-3">
                 <div className="flex items-center h-5">
                   <input
                     id="agreeToTerms"
                     type="checkbox"
                     checked={agreeToTerms}
                     onChange={(e) => setAgreeToTerms(e.target.checked)}
-                    className="w-4 h-4 text-cyan-600 bg-gray-100 border-gray-300 rounded focus:ring-cyan-500 focus:ring-2"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
                   />
                 </div>
                 <label
@@ -229,12 +229,12 @@ const SignUpForm = () => {
                   I agree to the{" "}
                   <a
                     href="#"
-                    className="text-cyan-600 hover:text-cyan-700 font-medium"
+                    className="text-blue-600 hover:text-blue-700 font-medium"
                   >
                     Terms of Service and Privacy Policy
                   </a>
                 </label>
-              </div>
+              </div> */}
 
               {/* Submit Button */}
               <button
@@ -243,7 +243,7 @@ const SignUpForm = () => {
                 className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform ${
                   loading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 hover:scale-105 shadow-lg hover:shadow-xl"
+                    : "bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 hover:scale-105 shadow-lg hover:shadow-xl"
                 }`}
               >
                 {loading ? "Creating Account..." : "Sign Up"}
@@ -256,7 +256,7 @@ const SignUpForm = () => {
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="text-cyan-600 hover:text-cyan-700 font-semibold transition-colors duration-200"
+                  className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200"
                 >
                   Log in
                 </Link>

@@ -19,6 +19,7 @@ import {
   Filler,
 } from "chart.js";
 import { Pie, Bar, Line, Doughnut, PolarArea, Radar } from "react-chartjs-2";
+import { Link } from "react-router-dom";
 
 // Register ChartJS components
 ChartJS.register(
@@ -1132,13 +1133,16 @@ const Dashboard = () => {
 
               {reports.length > 6 && (
                 <div className="mt-8 text-center">
-                  <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                  <Link
+                    to={profile?.role === "Patient" ? "/history" : "/reports"}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  >
                     View All {reports.length} Reports
                     <DashboardIcon
                       path="M13 7l5 5m0 0l-5 5m5-5H6"
                       className="w-4 h-4 ml-2 inline"
                     />
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>

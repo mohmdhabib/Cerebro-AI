@@ -31,7 +31,7 @@ const LoginForm = () => {
       <div className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center">
           {/* Brain Logo */}
-          <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-teal-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
             <svg
               className="w-6 h-6 text-white"
               fill="currentColor"
@@ -51,7 +51,7 @@ const LoginForm = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex items-center justify-center px-4 py-8">
+      <div className="flex items-center justify-center px-4 py-8 mt-15">
         <div className="w-full max-w-lg">
           {/* Title Section */}
           <div className="text-center mb-10">
@@ -78,7 +78,7 @@ const LoginForm = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-blue-400 transition-all duration-200"
                   placeholder="Enter your email"
                 />
               </div>
@@ -95,20 +95,20 @@ const LoginForm = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-cyan-400 transition-all duration-200"
+                  className="w-full px-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-3 focus:ring-cyan-100 focus:border-blue-400 transition-all duration-200"
                   placeholder="Enter your password"
                 />
               </div>
 
               {/* Forgot Password Link */}
-              <div className="flex justify-end">
+              {/* <div className="flex justify-end">
                 <a
                   href="#"
                   className="text-sm text-cyan-600 hover:text-cyan-700 font-medium transition-colors duration-200"
                 >
                   Forgot password?
                 </a>
-              </div>
+              </div> */}
 
               {/* Submit Button */}
               <button
@@ -117,7 +117,7 @@ const LoginForm = () => {
                 className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300 transform ${
                   loading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 hover:scale-105 shadow-lg hover:shadow-xl"
+                    : "bg-gradient-to-r from-blue-400 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 hover:scale-105 shadow-lg hover:shadow-xl"
                 }`}
               >
                 {loading ? "Signing In..." : "Sign In"}
@@ -130,7 +130,7 @@ const LoginForm = () => {
                 Don't have an account?{" "}
                 <Link
                   to="/signup"
-                  className="text-cyan-600 hover:text-cyan-700 font-semibold transition-colors duration-200"
+                  className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200"
                 >
                   Sign up
                 </Link>

@@ -2,20 +2,23 @@
 
 import uuid
 import traceback
-from flask import current_app
+from fastapi import Request
 
-def upload_image_to_storage(file, user_id):
+async def upload_image_to_storage(file, user_id, request: Request):
     """Uploads a file to Supabase storage and returns the full public URL."""
     try:
-        supabase = current_app.supabase
+        supabase = request.app.state.supabase
         file_extension = file.filename.split('.')[-1]
         unique_filename = f"{user_id}/{uuid.uuid4()}.{file_extension}"
         
-        # Reset file stream to the beginning before reading
-        file.stream.seek(0)
+        # Read file content
+        file_content = await file.read()
         
         # Upload the file
-        supabase.storage.from_("scan_images").upload(unique_filename, file.read())
+        supabase.storage.from_("scan_images").upload(unique_filename, file_content)
+        
+        # Reset file position for potential future reads
+        await file.seek(0)
         
         # Get the public URL which should be a full URL
         res = supabase.storage.from_("scan_images").get_public_url(unique_filename)
@@ -25,10 +28,10 @@ def upload_image_to_storage(file, user_id):
         traceback.print_exc()
         raise e
 
-def save_report_to_db(report_data):
+async def save_report_to_db(report_data, request: Request):
     """Saves report metadata to the 'reports' table."""
     try:
-        supabase = current_app.supabase
+        supabase = request.app.state.supabase
         data, count = supabase.table('reports').insert(report_data).execute()
         return data[1][0] if data[1] else None
     except Exception as e:
@@ -36,10 +39,10 @@ def save_report_to_db(report_data):
         traceback.print_exc()
         raise e
 
-def get_user_profile(user_id):
+async def get_user_profile(user_id, request: Request):
     """Fetches a user's profile. Handles cases where a profile may not exist."""
     try:
-        supabase = current_app.supabase
+        supabase = request.app.state.supabase
         response = supabase.table('profiles').select('*').eq('id', user_id).execute()
         
         # Check if any data was returned
@@ -54,9 +57,9 @@ def get_user_profile(user_id):
         # Return a default profile in case of an error
         return {"id": user_id, "role": "Patient", "full_name": "Unknown User"}
 
-def get_reports_from_db(user_id, role):
+async def get_reports_from_db(user_id, role, request: Request):
     try:
-        supabase = current_app.supabase
+        supabase = request.app.state.supabase
         # This query fetches all columns from reports and joins to get the full_name
         query = supabase.table('reports').select('*, profiles:patient_id (full_name)').order('created_at', desc=True)
         if role == 'Patient':

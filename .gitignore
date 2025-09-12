@@ -50,6 +50,22 @@ wheels/
 *.egg
 MANIFEST
 
+# TensorFlow & PyTorch models
+# Ignore saved models and weights
+*.h5
+*.hdf5
+*.ckpt
+*.ckpt.index
+*.index
+*.data-00000-of-00001
+saved_model/
+model/
+models/
+checkpoints/
+weights/
+*.pt
+*.pth
+
 # --- Node.js / Vite Frontend ---
 
 # Dependency directories
