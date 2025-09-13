@@ -6,6 +6,7 @@ import Layout from "./components/shared/Layout";
 import Spinner from "./components/shared/Spinner";
 
 // Correctly import pages from the /pages directory
+import HomePage from "./pages/HomePage";
 import Dashboard from "./pages/Dashboard";
 import LoginForm from "./components/auth/LoginForm";
 import SignUpForm from "./components/auth/SignupForm";
@@ -29,7 +30,7 @@ const PrivateRoutes = () => {
       <Outlet />
     </Layout>
   ) : (
-    <Navigate to="/login" replace />
+    <Navigate to="/" replace />
   );
 };
 
@@ -39,12 +40,12 @@ function App() {
   return (
     <Routes>
       {/* Public Routes (no layout) */}
+      <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginForm />} />
       <Route path="/signup" element={<SignUpForm />} />
 
       {/* Private Routes (wrapped in Layout) */}
       <Route element={<PrivateRoutes />}>
-        <Route path="/" element={<Dashboard />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/settings" element={<SettingsPage />} />
 
@@ -56,7 +57,7 @@ function App() {
           </>
         )}
 
-        {/* Doctor-Specific Route - THE FIX IS HERE */}
+        {/* Doctor-Specific Route */}
         {profile?.role === "Doctor" && (
           <Route path="/reports" element={<AllReportsPage />} />
         )}

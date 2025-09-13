@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+
 import Spinner from "../shared/Spinner";
 import api from "../../services/api";
 
@@ -47,11 +47,25 @@ const ResultCard = ({ report }) => {
     edema_present,
     contrast_pattern,
     tumor_grade,
+
   } = report;
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const confidencePercentage = (confidence * 100).toFixed(1);
+  const confidencePercentage = confidence
+    ? (confidence * 100).toFixed(1)
+    : "0.0";
   const isTumor = prediction && prediction.toLowerCase() !== "no tumor";
+
+  // Helper function to safely format dates
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      return format(new Date(dateString), "PPP");
+    } catch (error) {
+      console.error("Invalid date format:", dateString, error);
+      return "Invalid Date";
+    }
+  };
 
   const generatePdfBlob = async () => {
     const pdf = new jsPDF("p", "mm", "a4");
@@ -75,7 +89,8 @@ const ResultCard = ({ report }) => {
     pdf.text("Patient Information", 15, 40);
     pdf.setFont("helvetica", "normal");
     pdf.text(`Name: ${patient_name || "N/A"}`, 15, 48);
-    pdf.text(`Scan Date: ${format(new Date(created_at), "PPP")}`, 15, 54);
+    // Update this line to use the safe formatDate function
+    pdf.text(`Scan Date: ${formatDate(created_at)}`, 15, 54);
     pdf.text(`Report Generated: ${reportDate}`, 105, 48);
     pdf.text(`Report ID: ${report.id}`, 105, 54);
 
@@ -110,31 +125,44 @@ const ResultCard = ({ report }) => {
     // --- Image Section ---
     if (image_url) {
       try {
-        const imagePath = image_url.split("/scan_images/")[1].split("?")[0];
+        const imagePath = image_url.split("/scan_images/")[1]?.split("?")[0];
+        
+        if (!imagePath) {
+          throw new Error("Invalid image path");
+        }
+        
         const response = await api.get(`/image-proxy/${imagePath}`, {
           responseType: "blob",
         });
+        
         const localImageUrl = URL.createObjectURL(response.data);
-
-        const imageElement = await new Promise((resolve, reject) => {
-          const img = new Image();
-          img.src = localImageUrl;
-          img.onload = () => resolve(img);
+        
+        // Create an image element and wait for it to load
+        const img = new Image();
+        img.src = localImageUrl;
+        
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
           img.onerror = reject;
+          // Set a timeout in case the image never loads
+          setTimeout(reject, 5000);
         });
-
-        const canvas = await html2canvas(imageElement);
-        const imageData = canvas.toDataURL("image/jpeg", 0.8);
-
+        
+        // Add the image directly without using html2canvas
         pdf.addPage();
         pdf.setFontSize(16);
         pdf.setFont("helvetica", "bold");
         pdf.text("Uploaded MRI Scan", pageWidth / 2, 20, { align: "center" });
-        pdf.addImage(imageData, "JPEG", 15, 30, 180, 160);
+        
+        // Calculate dimensions to maintain aspect ratio
+        const imgWidth = 180;
+        const imgHeight = (img.height * imgWidth) / img.width;
+        
+        pdf.addImage(img, "JPEG", 15, 30, imgWidth, imgHeight);
         URL.revokeObjectURL(localImageUrl);
       } catch (error) {
         console.error("Could not add image to PDF:", error);
-        toast.error("Could not add image to PDF.");
+        toast.error("Could not add image to PDF: " + error.message);
       }
     }
 
@@ -159,6 +187,8 @@ const ResultCard = ({ report }) => {
     const toastId = toast.loading("Preparing PDF to share...");
     try {
       const pdfBlob = await generatePdfBlob();
+      if (!pdfBlob) throw new Error("Failed to generate PDF");
+      
       const fileName = `BrainScan-Report-${report.id}.pdf`;
       const pdfFile = new File([pdfBlob], fileName, {
         type: "application/pdf",
@@ -166,10 +196,12 @@ const ResultCard = ({ report }) => {
 
       if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         await navigator.share({ files: [pdfFile], title: "Brain Scan Report" });
+        toast.success("PDF shared successfully");
       } else {
         throw new Error("File sharing not supported by your browser.");
       }
     } catch (error) {
+      console.error("Share error:", error);
       toast.error(error.message || "Could not share PDF.");
     } finally {
       toast.dismiss(toastId);
@@ -182,6 +214,8 @@ const ResultCard = ({ report }) => {
     const toastId = toast.loading("Generating PDF report...");
     try {
       const pdfBlob = await generatePdfBlob();
+      if (!pdfBlob) throw new Error("Failed to generate PDF");
+      
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
@@ -190,8 +224,10 @@ const ResultCard = ({ report }) => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      toast.success("PDF downloaded successfully");
     } catch (error) {
-      toast.error("Could not generate PDF.");
+      console.error("Download error:", error);
+      toast.error("Could not generate PDF: " + error.message);
     } finally {
       toast.dismiss(toastId);
       setIsProcessing(false);
@@ -207,11 +243,9 @@ const ResultCard = ({ report }) => {
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
       <div className="relative">
+        {/* Show only the original image */}
         <img
-          src={
-            image_url ||
-            "https://via.placeholder.com/400x300?text=Image+Not+Available"
-          }
+          src={image_url || "https://via.placeholder.com/400x300?text=Image+Not+Available"}
           alt="MRI Scan"
           className="w-full h-56 object-cover"
         />
@@ -243,9 +277,13 @@ const ResultCard = ({ report }) => {
               path="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               className="h-4 w-4"
             />
-            <span>{format(new Date(created_at), "PPP")}</span>
+            <span>
+              {created_at ? format(new Date(created_at), "PPP") : "N/A"}
+            </span>
           </div>
         </div>
+
+    
         <div className="space-y-2 border-t border-b border-gray-100 py-4 mb-4">
           <DetailItem
             icon={<Icon path="M9 17v-2a4 4 0 00-4-4H3V7h2a4 4 0 004-4V3" />}

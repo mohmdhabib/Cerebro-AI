@@ -6,3 +6,5 @@ Pillow
 tensorflow
 python-multipart
 gunicorn
+matplotlib
+numpy
