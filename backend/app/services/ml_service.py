@@ -2,10 +2,10 @@
 
 import numpy as np
 from PIL import Image
-from . import preprocessing
 import os
 from tensorflow.keras.models import load_model
 import io
+from . import preprocessing
 
 # --- Model Loading ---
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

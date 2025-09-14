@@ -4,6 +4,7 @@ import api from "../services/api";
 import toast from "react-hot-toast";
 import ResultCard from "../components/dashboard/ResultCard";
 import Spinner from "../components/shared/Spinner";
+import ChatBot from "../components/chatbot/ChatBot";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -1194,7 +1195,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
                 {safeReports.map((report, index) => (
                   <div
                     key={report.id}
@@ -1232,6 +1233,7 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+      <ChatBot />
     </div>
   );
 };

@@ -14,6 +14,7 @@ import UploadPage from "./pages/UploadPage";
 import AllReportsPage from "./pages/AllReportsPage";
 import PatientHistoryPage from "./pages/PatientHistoryPage";
 import SettingsPage from "./pages/SettingsPage";
+import ReportReviewPage from "./pages/ReportReviewPage"; // Import the new page
 
 // This component wraps all private routes, applying the main layout and checking for auth
 const PrivateRoutes = () => {
@@ -48,23 +49,20 @@ function App() {
       <Route element={<PrivateRoutes />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/settings" element={<SettingsPage />} />
-
-        {/* Patient-Specific Routes */}
-        {profile?.role === "Patient" && (
+        <Route path="/upload" element={<UploadPage />} />
+        <Route path="/history" element={<PatientHistoryPage />} />
+        
+        {/* Doctor-specific routes */}
+        {profile?.role === "Doctor" && (
           <>
-            <Route path="/upload" element={<UploadPage />} />
-            <Route path="/history" element={<PatientHistoryPage />} />
+            <Route path="/reports" element={<AllReportsPage />} />
+            <Route path="/review/:reportId" element={<ReportReviewPage />} />
           </>
         )}
-
-        {/* Doctor-Specific Route */}
-        {profile?.role === "Doctor" && (
-          <Route path="/reports" element={<AllReportsPage />} />
-        )}
+        
+        {/* Fallback route */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
-
-      {/* Fallback for any other path */}
-      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }

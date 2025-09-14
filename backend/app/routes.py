@@ -1,8 +1,7 @@
 # backend/app/routes.py
 
 import traceback
-from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Request, Response, Body, Form
 from typing import Optional
 from .auth import get_current_user
 from .services import ml_service, supabase_service
@@ -12,22 +11,16 @@ bp = APIRouter(prefix="/api")
 @bp.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
-    location: Optional[str] = Form(None),
-    size_length_cm: Optional[float] = Form(None),
-    size_width_cm: Optional[float] = Form(None),
-    edema_present: Optional[bool] = Form(False),
-    contrast_pattern: Optional[str] = Form(None),
-    tumor_grade: Optional[str] = Form(None),
-    recommendation: Optional[str] = Form(None),
-    patient_age: Optional[int] = Form(None),
-    patient_gender: Optional[str] = Form(None),
     user = Depends(get_current_user),
     request: Request = None
 ):
+    """
+    Handles the initial patient upload. Only saves the AI prediction.
+    """
     try:
         user_id = user.id
         
-        # 1. Get prediction from the model - AWAIT ADDED HERE
+        # 1. Get prediction from the model
         prediction, confidence = await ml_service.predict(file)
         
         # 2. Upload image to storage
@@ -39,15 +32,7 @@ async def upload_file(
             "image_url": image_url,
             "prediction": prediction,
             "confidence": float(confidence),
-            "location": location,
-            "size_length_cm": size_length_cm,
-            "size_width_cm": size_width_cm,
-            "edema_present": edema_present,
-            "contrast_pattern": contrast_pattern,
-            "tumor_grade": tumor_grade,
-            "recommendation": recommendation,
-            "patient_age": patient_age,
-            "patient_gender": patient_gender,
+            "status": "Pending Review"
         }
 
         # 4. Save the complete report to the database
@@ -59,20 +44,48 @@ async def upload_file(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"An error occurred during upload and processing: {str(e)}")
 
+@bp.post("/reports/{report_id}/analysis")
+async def create_analysis(
+    report_id: int,
+    analysis_data: dict = Body(...),
+    user = Depends(get_current_user),
+    request: Request = None
+):
+    try:
+        user_profile = await supabase_service.get_user_profile(user.id, request)
+        if user_profile.get('role') != 'Doctor':
+            raise HTTPException(status_code=403, detail="Only doctors can submit analysis.")
+
+        analysis_data['doctor_id'] = user.id
+        analysis_data['report_id'] = report_id
+        
+        saved_analysis = await supabase_service.save_doctor_analysis(analysis_data, request)
+        await supabase_service.update_report_status(report_id, "Completed", request)
+        
+        return saved_analysis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save analysis: {str(e)}")
+
+@bp.get("/reports/{report_id}/analysis")
+async def get_analysis(report_id: int, user = Depends(get_current_user), request: Request = None):
+    """Get doctor analysis for a specific report."""
+    try:
+        analysis = await supabase_service.get_doctor_analysis_by_report_id(report_id, request)
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found for this report")
+        return analysis
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve analysis: {str(e)}")
 
 @bp.get("/reports")
 async def get_reports(user = Depends(get_current_user), request: Request = None):
-    try:
-        user_id = user.id
-        user_profile = await supabase_service.get_user_profile(user_id, request)
-        
-        reports = await supabase_service.get_reports_from_db(user_id, user_profile['role'], request)
-        return reports
-
-    except Exception as e:
-        print(f"Error in get_reports route: {str(e)}")
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Failed to fetch reports: {str(e)}")
+    user_id = user.id
+    user_profile = await supabase_service.get_user_profile(user_id, request)
+    reports = await supabase_service.get_reports_from_db(user_id, user_profile['role'], request)
+    return reports
 
 @bp.get("/image-proxy/{file_path:path}")
 async def image_proxy(file_path: str, user = Depends(get_current_user), request: Request = None):

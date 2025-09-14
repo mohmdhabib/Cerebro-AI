@@ -39,6 +39,46 @@ async def save_report_to_db(report_data, request: Request):
         traceback.print_exc()
         raise e
 
+async def save_doctor_analysis(analysis_data: dict, request: Request):
+    """Saves the doctor's analysis to the 'doctor_analysis' table."""
+    try:
+        supabase = request.app.state.supabase
+        
+        # Convert empty strings to None for numeric fields
+        numeric_fields = ['size_length_cm', 'size_width_cm', 'patient_age']
+        for field in numeric_fields:
+            if field in analysis_data and analysis_data[field] == '':
+                analysis_data[field] = None
+        
+        response = supabase.table('doctor_analysis').insert(analysis_data).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        print(f"ERROR in save_doctor_analysis: {str(e)}")
+        traceback.print_exc()
+        raise e
+
+async def get_doctor_analysis_by_report_id(report_id: int, request: Request):
+    """Fetches doctor analysis for a specific report ID."""
+    try:
+        supabase = request.app.state.supabase
+        response = supabase.table('doctor_analysis').select('*').eq('report_id', report_id).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        print(f"ERROR in get_doctor_analysis_by_report_id: {str(e)}")
+        traceback.print_exc()
+        return None
+
+async def update_report_status(report_id: int, status: str, request: Request):
+    """Updates the status of a report in the 'reports' table."""
+    try:
+        supabase = request.app.state.supabase
+        response = supabase.table('reports').update({"status": status}).eq('id', report_id).execute()
+        return response.data[0] if response.data else None
+    except Exception as e:
+        print(f"ERROR in update_report_status: {str(e)}")
+        traceback.print_exc()
+        raise e
+
 async def get_user_profile(user_id, request: Request):
     """Fetches a user's profile. Handles cases where a profile may not exist."""
     try:
@@ -60,20 +100,12 @@ async def get_user_profile(user_id, request: Request):
 async def get_reports_from_db(user_id, role, request: Request):
     try:
         supabase = request.app.state.supabase
-        # This query fetches all columns from reports and joins to get the full_name
-        query = supabase.table('reports').select('*, profiles:patient_id (full_name)').order('created_at', desc=True)
+        # This query now joins with both profiles and the new doctor_analysis table
+        query = supabase.table('reports').select('*, profiles:patient_id (full_name), doctor_analysis(*)').order('created_at', desc=True)
         if role == 'Patient':
             query = query.eq('patient_id', user_id)
         response = query.execute()
-        if not response.data: return []
-        
-        # This loop flattens the result to include 'patient_name'
-        reports = response.data
-        for report in reports:
-            profile_data = report.get('profiles')
-            report['patient_name'] = profile_data.get('full_name') if profile_data else 'N/A'
-            if 'profiles' in report: del report['profiles']
-        return reports
+        return response.data if response.data else []
     except Exception as e:
         traceback.print_exc()
         raise e
