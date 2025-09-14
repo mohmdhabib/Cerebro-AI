@@ -2,7 +2,7 @@ import axios from "axios";
 import { supabase } from "./supabaseClient";
 
 const api = axios.create({
-  baseURL: "http://localhost:8001/api/", // Updated to match backend routes prefix
+  baseURL: "https://cerebro-ai-2.onrender.com", // Updated to match backend routes prefix
 });
 
 // Interceptor to add the Supabase auth token to every request
