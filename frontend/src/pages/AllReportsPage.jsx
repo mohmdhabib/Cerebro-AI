@@ -16,7 +16,7 @@ const AllReportsPage = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const { data } = await api.get("/reports");
+        const { data } = await api.get("api/reports");
         setReports(data);
       } catch (error) {
         toast.error("Failed to fetch reports.");
