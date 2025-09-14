@@ -3,14 +3,15 @@ import UploadForm from "../components/UploadForm";
 
 const UploadPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-500/20 rounded-full mb-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-8 shadow-xl border-4 border-white relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full animate-pulse opacity-75"></div>
               <svg
-                className="w-12 h-12 text-blue-300"
+                className="w-12 h-12 text-white relative z-10"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -36,119 +37,151 @@ const UploadPage = () => {
                 />
               </svg>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h1 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6 leading-tight">
               AI-Powered MRI Analysis
             </h1>
-            <p className="text-lg text-blue-200/80 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-700 max-w-2xl mx-auto leading-relaxed font-medium">
               Upload your brain MRI scan for a comprehensive analysis using our
               advanced deep learning models. Secure, fast, and accurate.
             </p>
           </div>
 
           {/* Main Upload Card */}
-          <div className="bg-gray-800/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-blue-500/20 overflow-hidden">
-            <div className="px-8 py-8 md:px-12 md:py-14">
-              <UploadForm />
+          <div className="relative mb-16">
+            {/* Decorative background elements */}
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 rounded-3xl blur-xl"></div>
+            <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-blue-200/50 overflow-hidden">
+              {/* Glassmorphism effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-sm"></div>
+              <div className="relative px-8 py-8 md:px-12 md:py-14">
+                <UploadForm />
+              </div>
             </div>
           </div>
 
           {/* Features Section */}
           <div className="grid md:grid-cols-3 gap-8 mt-16">
-            <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-6 border border-white/10 transition-all duration-300 hover:border-blue-400/50 hover:bg-gray-800/60">
-              <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-green-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  />
-                </svg>
+            <div className="group relative bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-gray-200/50 transition-all duration-500 hover:shadow-2xl hover:scale-105 hover:-translate-y-2">
+              {/* Animated background on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-green-600 transition-colors duration-300">
+                  Secure & Private
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                  Your data is encrypted and processed with the highest security
+                  standards, ensuring HIPAA compliance.
+                </p>
               </div>
-              <h3 className="font-semibold text-white mb-2">
-                Secure & Private
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Your data is encrypted and processed with the highest security
-                standards, ensuring HIPAA compliance.
-              </p>
             </div>
 
-            <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-6 border border-white/10 transition-all duration-300 hover:border-blue-400/50 hover:bg-gray-800/60">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-blue-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
+            <div className="group relative bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-gray-200/50 transition-all duration-500 hover:shadow-2xl hover:scale-105 hover:-translate-y-2">
+              {/* Animated background on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-sky-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-sky-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors duration-300">
+                  Rapid Analysis
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                  Our AI algorithms provide comprehensive results in minutes,
+                  not hours.
+                </p>
               </div>
-              <h3 className="font-semibold text-white mb-2">Rapid Analysis</h3>
-              <p className="text-gray-400 text-sm">
-                Our AI algorithms provide comprehensive results in minutes, not
-                hours.
-              </p>
             </div>
 
-            <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-6 border border-white/10 transition-all duration-300 hover:border-blue-400/50 hover:bg-gray-800/60">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-purple-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9 17v-2a4 4 0 014-4h2a4 4 0 014 4v2m-6 4h.01M9 13h.01M15 13h.01M12 21h.01M12 17h.01M12 13h.01M12 9h.01M12 5h.01"
-                  />
-                </svg>
+            <div className="group relative bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-gray-200/50 transition-all duration-500 hover:shadow-2xl hover:scale-105 hover:-translate-y-2">
+              {/* Animated background on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-violet-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 17v-2a4 4 0 014-4h2a4 4 0 014 4v2m-6 4h.01M9 13h.01M15 13h.01M12 21h.01M12 17h.01M12 13h.01M12 9h.01M12 5h.01"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-purple-600 transition-colors duration-300">
+                  Detailed Insights
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                  Receive in-depth reports with visual insights and clear,
+                  actionable recommendations.
+                </p>
               </div>
-              <h3 className="font-semibold text-white mb-2">
-                Detailed Insights
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Receive in-depth reports with visual insights and clear,
-                actionable recommendations.
-              </p>
             </div>
           </div>
 
           {/* AI Model Information Section */}
-          <div className="bg-gray-800/40 backdrop-blur-md rounded-xl p-6 border border-white/10 transition-all duration-300 hover:border-blue-400/50 hover:bg-gray-800/60 mt-8">
-            <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mb-4">
-              <svg
-                className="w-6 h-6 text-yellow-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
-                />
-              </svg>
+          <div className="group relative bg-white/90 backdrop-blur-lg rounded-2xl p-8 shadow-lg border border-gray-200/50 transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] mt-12">
+            {/* Animated background on hover */}
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <div className="relative">
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-orange-600 transition-colors duration-300">
+                AI Model Information
+              </h3>
+              <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                Our AI model is trained on a diverse dataset of over 10,000 MRI
+                scans, achieving an accuracy of 98.7%. It is certified for
+                medical-grade analysis and adheres to FDA and CE standards.
+              </p>
             </div>
-            <h3 className="font-semibold text-white mb-2">AI Model Information</h3>
-            <p className="text-gray-400 text-sm">
-              Our AI model is trained on a diverse dataset of over 10,000 MRI scans, achieving an accuracy of 98.7%. It is certified for medical-grade analysis and adheres to FDA and CE standards.
-            </p>
           </div>
         </div>
       </div>
