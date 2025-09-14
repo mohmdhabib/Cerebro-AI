@@ -108,7 +108,7 @@ const UploadForm = () => {
   }
 
   if (analysisResult) {
-    const isNoTumor = analysisResult.predicted_class === "No Tumor";
+    const isNoTumor = analysisResult.prediction === "No Tumor";
 
     return (
       <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
@@ -143,7 +143,7 @@ const UploadForm = () => {
             <p className="text-gray-700 text-lg">
               AI Prediction:{" "}
               <span className="font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                {analysisResult.predicted_class}
+                {analysisResult.prediction}
               </span>
             </p>
           </div>
@@ -153,7 +153,7 @@ const UploadForm = () => {
           {/* Original Scan */}
           <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 shadow-sm">
             <div className="flex items-center space-x-2 mb-4">
-              <span className="text-xl">🔬</span>
+              {/* <span className="text-xl">🔬</span> */}
               <h3 className="text-lg font-semibold text-gray-800">
                 Original MRI Scan
               </h3>
@@ -162,7 +162,7 @@ const UploadForm = () => {
               <img
                 src={preview}
                 alt="Uploaded MRI"
-                className="w-full h-80 object-cover rounded-lg shadow-md border border-gray-200 group-hover:shadow-lg transition-shadow duration-300"
+                className="w-full h-134 object-cover rounded-lg shadow-md border border-gray-200 group-hover:shadow-lg transition-shadow duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
@@ -171,16 +171,16 @@ const UploadForm = () => {
           {/* AI Analysis */}
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200 shadow-sm">
             <div className="flex items-center space-x-2 mb-4">
-              <span className="text-xl">🤖</span>
+              {/* <span className="text-xl">🤖</span> */}
               <h3 className="text-lg font-semibold text-gray-800">
                 AI Analysis (Grad-CAM)
               </h3>
             </div>
             <div className="relative group">
               <img
-                src={`data:image/png;base64,${analysisResult.gradcam}`}
+                src={analysisResult.gradcam_image_url}
                 alt="AI Grad-CAM Analysis"
-                className="w-full h-80 object-cover rounded-lg shadow-md border border-blue-200 group-hover:shadow-lg transition-shadow duration-300"
+                className="w-full h-134 object-cover rounded-lg shadow-md border border-blue-200 group-hover:shadow-lg transition-shadow duration-300"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
@@ -223,8 +223,8 @@ const UploadForm = () => {
 
   // Upload Form UI
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-      <div className="text-center mb-8">
+    <div className="bg-white rounded-2xl shadow-xl p-7 border border-gray-100">
+      <div className="text-center mb-4">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">
           🧠 MRI Brain Tumor Analysis
         </h2>
@@ -298,7 +298,7 @@ const UploadForm = () => {
 
                 <div>
                   <p className="text-xl font-semibold text-gray-800 mb-1">
-                    📤 Upload MRI Scan
+                    Upload MRI Scan
                   </p>
                   <p className="text-gray-600">
                     Click here or drag and drop your image
@@ -341,7 +341,7 @@ const UploadForm = () => {
               </span>
             ) : (
               <span className="flex items-center justify-center space-x-2">
-                <span>🚀</span>
+                {/* <span>🚀</span> */}
                 <span>Start AI Analysis</span>
               </span>
             )}

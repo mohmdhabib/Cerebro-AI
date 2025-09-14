@@ -1,57 +1,55 @@
 # backend/app/services/ml_service.py
+import httpx
+import base64
 
-import numpy as np
-from PIL import Image
-import os
-from tensorflow.keras.models import load_model
-import io
-from . import preprocessing
-
-# --- Model Loading ---
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MODEL_PATH = os.path.join(BASE_DIR, 'ml_model', 'saved_model', 'model.h5')
-
-try:
-    model = load_model(MODEL_PATH)
-    print(f"--- Model successfully loaded from {MODEL_PATH} ---")
-except Exception as e:
-    print(f"CRITICAL ERROR: Could not load the model. Ensure 'model.h5' exists at {MODEL_PATH}")
-    print(f"Error details: {e}")
-    model = None
-
-# --- Prediction Decoding ---
-CLASS_NAMES = ["glioma", "meningioma", "notumor", "pituitary"]
-
-def decode_predictions(prediction_raw):
-    """Decodes the model's raw output into a class name and confidence score."""
-    if prediction_raw is None or len(prediction_raw[0]) != len(CLASS_NAMES):
-        return "Prediction Error", 0.0
-
-    confidence = np.max(prediction_raw)
-    predicted_class_index = np.argmax(prediction_raw)
-    prediction_class = CLASS_NAMES[predicted_class_index]
-    
-    return prediction_class.capitalize(), float(confidence)
+# --- GCP Endpoint Configuration ---
+# TODO: Replace with your actual GCP endpoint URL
+GCP_ENDPOINT_URL = "http://localhost:8000/predict/"  # Example placeholder
 
 # --- Main Prediction Function ---
 async def predict(image_file):
-    """Processes an image and returns the model's prediction."""
-    if model is None:
-        return "Model not loaded", 0.0
+    """
+    Sends an image to the GCP endpoint for prediction and returns the result.
+    """
+    if not GCP_ENDPOINT_URL or GCP_ENDPOINT_URL == "YOUR_GCP_ENDPOINT_URL_HERE":
+        print("CRITICAL ERROR: GCP_ENDPOINT_URL is not set.")
+        return {
+            "success": False,
+            "error": "Model endpoint is not configured."
+        }
 
-    # Read the file content
     contents = await image_file.read()
-    
-    # Reset file position for potential future reads
-    await image_file.seek(0)
-    
-    # 1. Preprocess the image to the correct size: 224x224
-    image = Image.open(io.BytesIO(contents))
-    processed_image = preprocessing.preprocess_image(image, target_size=(224, 224))
-    image_batch = np.expand_dims(processed_image, axis=0)
-    
-    # 2. Use the model to make a prediction
-    prediction_raw = model.predict(image_batch)
-    
-    # 3. Decode the prediction
-    return decode_predictions(prediction_raw)
+
+    # Prepare the file for multipart upload
+    files = {"file": (image_file.filename, contents, image_file.content_type)}
+
+    async with httpx.AsyncClient() as client:
+        try:
+            # Send request to the GCP endpoint as multipart/form-data
+            response = await client.post(
+                GCP_ENDPOINT_URL,
+                files=files,
+                timeout=30.0
+            )
+            response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
+            
+            # Assuming the GCP endpoint returns a JSON response like:
+            # {
+            #   "success": true,
+            #   "predicted_class": "No Tumor",
+            #   "gradcam": "iVBORw0KGgo..."
+            # }
+            return response.json()
+
+        except httpx.RequestError as e:
+            print(f"ERROR: Could not reach the GCP endpoint. Details: {e}")
+            return {
+                "success": False,
+                "error": f"Failed to connect to the prediction service: {e}"
+            }
+        except Exception as e:
+            print(f"CRITICAL ERROR: An unexpected error occurred during prediction. Details: {e}")
+            return {
+                "success": False,
+                "error": f"An unexpected error occurred: {e}"
+            }

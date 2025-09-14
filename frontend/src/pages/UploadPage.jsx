@@ -4,9 +4,9 @@ import UploadForm from "../components/UploadForm";
 const UploadPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 ">
         <div className="max-w-7xl mx-auto">
-          {/* Header Section */}
+          {/* Header Section
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-8 shadow-xl border-4 border-white relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full animate-pulse opacity-75"></div>
@@ -44,7 +44,7 @@ const UploadPage = () => {
               Upload your brain MRI scan for a comprehensive analysis using our
               advanced deep learning models. Secure, fast, and accurate.
             </p>
-          </div>
+          </div> */}
 
           {/* Main Upload Card */}
           <div className="relative mb-16">
@@ -53,7 +53,7 @@ const UploadPage = () => {
             <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-blue-200/50 overflow-hidden">
               {/* Glassmorphism effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-sm"></div>
-              <div className="relative px-8 py-8 md:px-12 md:py-14">
+              <div className="relative px-4 py-4 md:px-7 md:py-7">
                 <UploadForm />
               </div>
             </div>

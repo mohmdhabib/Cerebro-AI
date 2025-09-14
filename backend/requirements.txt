@@ -3,8 +3,6 @@ uvicorn
 python-dotenv
 supabase
 Pillow
-tensorflow
 python-multipart
-gunicorn
 matplotlib
 numpy

@@ -21,21 +21,33 @@ async def upload_file(
         user_id = user.id
         
         # 1. Get prediction from the model
-        prediction, confidence = await ml_service.predict(file)
-        
-        # 2. Upload image to storage
+        prediction_result = await ml_service.predict(file)
+
+        if not prediction_result.get("success"):
+            error_message = prediction_result.get("error", "Unknown prediction error")
+            raise HTTPException(status_code=500, detail=error_message)
+
+        prediction = prediction_result.get("predicted_class")
+        gradcam_b64 = prediction_result.get("gradcam")
+
+        # 2. Upload original image to storage
         image_url = await supabase_service.upload_image_to_storage(file, user_id, request)
 
-        # 3. Prepare report data
+        # 3. Upload Grad-CAM image to storage
+        gradcam_url = None
+        if gradcam_b64:
+            gradcam_url = await supabase_service.upload_gradcam_image(gradcam_b64, user_id, request)
+
+        # 4. Prepare report data
         report_data = {
             "patient_id": user_id,
             "image_url": image_url,
             "prediction": prediction,
-            "confidence": float(confidence),
+            "gradcam_image_url": gradcam_url,
             "status": "Pending Review"
         }
 
-        # 4. Save the complete report to the database
+        # 5. Save the complete report to the database
         saved_report = await supabase_service.save_report_to_db(report_data, request)
 
         return saved_report
