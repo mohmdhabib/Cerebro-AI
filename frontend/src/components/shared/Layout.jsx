@@ -221,7 +221,7 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <div
@@ -234,10 +234,10 @@ const Layout = ({ children }) => {
       <div
         className={`fixed inset-y-0 left-0 z-50 w-60 bg-white shadow-sm transition-transform duration-300 ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static lg:inset-0`}
+        } lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}
       >
         {/* Logo Section */}
-        <div className="h-20 flex items-center px-6 border-b border-gray-100">
+        <div className="h-20 flex items-center px-6 border-b border-gray-100 flex-shrink-0">
           <Link to="/dashboard" className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">N</span>
@@ -250,7 +250,7 @@ const Layout = ({ children }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6">
+        <nav className="flex-1 px-4 py-6 overflow-y-auto">
           <div className="space-y-1">
             {sidebarItems.map((item, index) => {
               if (item.showFor && profile?.role !== item.showFor) return null;
@@ -283,33 +283,48 @@ const Layout = ({ children }) => {
           </div>
         </nav>
 
-        {/* Help Section */}
-        {/* Sign Out Button */}
-        <button
-          onClick={handleLogout}
-          className="flex ml-5 items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-        >
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {/* User Profile and Sign Out Section */}
+        <div className="border-t border-gray-100 p-4 flex-shrink-0 space-y-3">
+          {/* User Profile in Sidebar */}
+          <div className="flex items-center space-x-3 px-3 py-2">
+            <UserAvatar size="sm" />
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-gray-900 truncate">
+                {profile?.full_name || "Alex Johnson"}
+              </div>
+              <div className="text-xs text-gray-500 capitalize">
+                {profile?.role || "Patient"}
+              </div>
+            </div>
+          </div>
+
+          {/* Sign Out Button */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          Sign Out
-        </button>
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            Sign Out
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-20 bg-white shadow-sm flex items-center justify-between px-8 border-b border-gray-100">
+        <header className="h-20 bg-white shadow-sm flex items-center justify-between px-8 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleMobileSidebar}
@@ -393,8 +408,8 @@ const Layout = ({ children }) => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto p-8 bg-gray-50">
-          <div className="max-w-7xl mx-auto">{children}</div>
+        <main className="flex-1 overflow-y-auto p-8 bg-gray-50">
+          <div className="mx-auto">{children}</div>
         </main>
       </div>
     </div>

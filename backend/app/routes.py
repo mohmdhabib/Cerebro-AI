@@ -1,3 +1,5 @@
+# backend/app/routes.py
+
 import traceback
 from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
@@ -25,8 +27,8 @@ async def upload_file(
     try:
         user_id = user.id
         
-        # 1. Get prediction from the model
-        prediction, confidence = ml_service.predict(file)
+        # 1. Get prediction from the model - AWAIT ADDED HERE
+        prediction, confidence = await ml_service.predict(file)
         
         # 2. Upload image to storage
         image_url = await supabase_service.upload_image_to_storage(file, user_id, request)
