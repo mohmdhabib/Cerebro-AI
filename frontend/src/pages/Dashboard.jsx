@@ -58,6 +58,7 @@ const Dashboard = () => {
   const { user, profile } = useAuth();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
+  const safeReports = Array.isArray(reports) ? reports : [];
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -86,6 +87,17 @@ const Dashboard = () => {
     const severityData = {};
     const timeAnalysis = {};
     const riskAssessment = {};
+
+    if (!Array.isArray(reports)) {
+      return {
+        predictionCounts,
+        confidenceData,
+        monthlyData,
+        severityData,
+        timeAnalysis,
+        riskAssessment,
+      };
+    }
 
     reports.forEach((report) => {
       // For prediction type pie chart
@@ -153,7 +165,7 @@ const Dashboard = () => {
     severityData,
     timeAnalysis,
     riskAssessment,
-  } = reports.length
+  } = safeReports.length
     ? prepareChartData()
     : {
         predictionCounts: {},
@@ -341,12 +353,12 @@ const Dashboard = () => {
     );
   }
 
-  const tumorDetectedCount = reports.filter(
+  const tumorDetectedCount = safeReports.filter(
     (r) => r.prediction && r.prediction.toLowerCase() !== "notumor"
   ).length;
   const latestScanDate =
-    reports.length > 0
-      ? new Date(reports[0].created_at).toLocaleDateString("en-US", {
+    safeReports.length > 0
+      ? new Date(safeReports[0].created_at).toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
           day: "numeric",
@@ -402,7 +414,7 @@ const Dashboard = () => {
           <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
         </div>
 
-        {reports.length === 0 ? (
+        {safeReports.length === 0 ? (
           <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-16 text-center">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl flex items-center justify-center mx-auto mb-8">
               <DashboardIcon
@@ -440,7 +452,7 @@ const Dashboard = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-slate-800">
-                      {reports.length}
+                      {safeReports.length}
                     </div>
                     <div className="text-xs text-green-600 font-semibold">
                       +12% this month
@@ -491,8 +503,8 @@ const Dashboard = () => {
                   <div className="text-right">
                     <div className="text-2xl font-bold text-slate-800">
                       {(
-                        ((reports.length - tumorDetectedCount) /
-                          reports.length) *
+                        ((safeReports.length - tumorDetectedCount) /
+                          safeReports.length) *
                           100 || 0
                       ).toFixed(0)}
                       %
@@ -1053,7 +1065,7 @@ const Dashboard = () => {
               </div>
 
               <div className="space-y-4">
-                {reports.slice(0, 6).map((report, index) => (
+                {safeReports.slice(0, 6).map((report, index) => (
                   <div
                     key={report.id}
                     className="group flex items-center p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 border border-slate-200 hover:border-blue-200 hover:shadow-lg transform hover:scale-[1.01]"
@@ -1131,13 +1143,13 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              {reports.length > 6 && (
+              {safeReports.length > 6 && (
                 <div className="mt-8 text-center">
                   <Link
                     to={profile?.role === "Patient" ? "/history" : "/reports"}
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold px-8 py-3 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
-                    View All {reports.length} Reports
+                    View All {safeReports.length} Reports
                     <DashboardIcon
                       path="M13 7l5 5m0 0l-5 5m5-5H6"
                       className="w-4 h-4 ml-2 inline"
@@ -1153,7 +1165,7 @@ const Dashboard = () => {
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mr-4">
                     <DashboardIcon
-                      path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H7a2 2 0 00-2 2v2m0 0h10"
                       className="w-5 h-5 text-amber-600"
                     />
                   </div>
@@ -1183,7 +1195,7 @@ const Dashboard = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {reports.map((report, index) => (
+                {safeReports.map((report, index) => (
                   <div
                     key={report.id}
                     className="group transform hover:scale-105 transition-all duration-300"
@@ -1200,7 +1212,7 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              {reports.length === 0 && (
+              {safeReports.length === 0 && (
                 <div className="text-center py-16">
                   <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
                     <DashboardIcon
