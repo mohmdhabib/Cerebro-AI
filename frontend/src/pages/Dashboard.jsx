@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import ResultCard from "../components/dashboard/ResultCard";
 import Spinner from "../components/shared/Spinner";
 import ChatBot from "../components/chatbot/ChatBot";
+import UploadForm from "../components/UploadForm";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -372,6 +373,17 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
+          {isPatient && (
+            <Link 
+              to="/upload"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg"
+            >
+              Upload New Scan
+            </Link>
+          )}
+        </div>
         {/* Professional Header */}
         <div className="relative overflow-hidden bg-white rounded-3xl border shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
@@ -433,11 +445,11 @@ const Dashboard = () => {
                 ? "Upload your first brain scan to begin AI-powered medical analysis and get personalized health insights."
                 : "No patient reports are currently available in the system."}
             </p>
-            {isPatient && (
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                Upload Your First Scan
-              </button>
-            )}
+            {isPatient ? (
+              <div className="max-w-3xl mx-auto">
+                <UploadForm />
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="space-y-8">

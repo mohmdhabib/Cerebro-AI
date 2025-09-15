@@ -43,9 +43,9 @@ const ResultCard = ({ report }) => {
   const { profile } = useAuth(); // Get user profile to check role
   const {
     id,
-    image_url,
+    // image_url,
     prediction,
-    confidence,
+    // confidence,  // Commented out confidence
     created_at,
     status,
     gradcam_image_url,
@@ -80,9 +80,9 @@ const ResultCard = ({ report }) => {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
-  const confidencePercentage = confidence
-    ? (confidence * 100).toFixed(1)
-    : "0.0";
+  // const confidencePercentage = confidence
+  //   ? (confidence * 100).toFixed(1)
+  //   : "0.0";
   const isTumor = prediction && prediction.toLowerCase() !== "no tumor";
 
   // Helper function to safely format dates
@@ -158,7 +158,7 @@ const ResultCard = ({ report }) => {
     };
 
     addDetail("AI Prediction", prediction);
-    addDetail("Confidence", `${confidencePercentage}%`);
+    // addDetail("Confidence", `${confidencePercentage}%`);  // Commented out confidence in PDF
 
     if (analysis) {
       yPosition += 4;
@@ -319,11 +319,11 @@ const ResultCard = ({ report }) => {
     }
   };
 
-  const getConfidenceColor = () => {
-    if (confidencePercentage > 85) return "bg-emerald-500";
-    if (confidencePercentage > 60) return "bg-yellow-500";
-    return "bg-red-500";
-  };
+  // const getConfidenceColor = () => {  // Commented out getConfidenceColor function
+  //   if (confidencePercentage > 85) return "bg-emerald-500";
+  //   if (confidencePercentage > 60) return "bg-yellow-500";
+  //   return "bg-red-500";
+  // };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -741,8 +741,8 @@ const ResultCard = ({ report }) => {
             )}
           </div>
 
-          {/* Confidence */}
-          <div className="mb-4">
+          {/* Confidence - Commented out */}
+          {/* <div className="mb-4">
             <div className="flex justify-between items-center mb-1">
               <span className="text-sm font-medium text-gray-700 flex items-center">
                 <Icon
@@ -761,7 +761,7 @@ const ResultCard = ({ report }) => {
                 style={{ width: `${confidencePercentage}%` }}
               ></div>
             </div>
-          </div>
+          </div> */}
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2">
