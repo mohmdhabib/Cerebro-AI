@@ -49,15 +49,15 @@ const SignUpForm = () => {
     <div className="min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between px-8 py-6">
-        <div className="flex items-center">
+        <Link to="/" className="flex items-center">
           <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
             <div className="w-5 h-5 bg-white rounded-md opacity-90"></div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">NeuroScan</h1>
-        </div>
+          <h1 className="text-2xl font-bold text-gray-800">Cerebro-AI</h1>
+        </Link>
         <Link
           to="/login"
-          className="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 border shadow-md p-2 rounded"
+          className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-semibold rounded-lg shadow-md px-5 py-2 transition-all duration-300 transform hover:scale-105"
         >
           Log In
         </Link>
@@ -72,7 +72,7 @@ const SignUpForm = () => {
               Create your account
             </h2>
             <p className="text-lg text-gray-600">
-              Join NeuroScan to get insights about your brain health.
+              Join Cerebro-AI to get insights about your brain health.
             </p>
           </div>
 

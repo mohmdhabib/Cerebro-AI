@@ -1073,7 +1073,7 @@ const Dashboard = () => {
                   >
                     <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-200 to-slate-300 overflow-hidden mr-6 flex-shrink-0 shadow-lg">
                       <img
-                        src={report.image_url}
+                        src={report.gradcam_image_url}
                         alt="Brain scan"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {

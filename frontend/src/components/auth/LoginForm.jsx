@@ -29,7 +29,7 @@ const LoginForm = () => {
     <div className="min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between px-8 py-6">
-        <div className="flex items-center">
+        <Link to='/' className="flex items-center">
           {/* Brain Logo */}
           <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
             <svg
@@ -40,11 +40,11 @@ const LoginForm = () => {
               <path d="M12 2C9.79 2 8 3.79 8 6c0 .35.06.68.14 1H7c-1.66 0-3 1.34-3 3v1c0 1.66 1.34 3 3 3h1.14c-.08.32-.14.65-.14 1 0 2.21 1.79 4 4 4s4-1.79 4-4c0-.35-.06-.68-.14-1H17c1.66 0 3-1.34 3-3v-1c0-1.66-1.34-3-3-3h-1.14c.08-.32.14-.65.14-1 0-2.21-1.79-4-4-4zm0 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-5 5h1c.55 0 1 .45 1 1s-.45 1-1 1H7c-.55 0-1-.45-1-1s.45-1 1-1zm10 0c.55 0 1 .45 1 1s-.45 1-1 1h-1c-.55 0-1-.45-1-1s.45-1 1-1h1zm-5 5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">NeuroScan</h1>
-        </div>
+          <h1 className="text-2xl font-bold text-gray-800">Cerebro-AI</h1>
+        </Link>
         <Link
           to="/signup"
-          className="px-6 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+          className="px-6 py-2 bg-blue-500 text-white border border-gray-300 rounded-lg hover:bg-blue-400 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
         >
           Sign Up
         </Link>

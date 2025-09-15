@@ -155,7 +155,7 @@ const SettingsPage = () => {
                       />
                     </svg>
                     <span className="text-gray-900 font-medium">
-                      {user?.email || "doctor@neuroscan.com"}
+                      {user?.email || "doctor@cerebro-ai.com"}
                     </span>
                   </div>
                 </div>

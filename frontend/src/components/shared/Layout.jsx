@@ -142,7 +142,7 @@ const Layout = ({ children }) => {
     return (
       <div className={`flex items-center space-x-3 ${className}`}>
         <div
-          className={`${sizeClasses[size]} bg-gray-600 rounded-full flex items-center justify-center`}
+          className={`${sizeClasses[size]} bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0`}
         >
           <span className="text-white font-semibold">
             {profile?.full_name
@@ -162,6 +162,11 @@ const Layout = ({ children }) => {
                 {profile?.full_name || "Alex Johnson"}
               </div>
             )}
+            {showRole && (
+              <div className="text-xs text-gray-500 capitalize">
+                {profile?.role || "Patient"}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -172,11 +177,14 @@ const Layout = ({ children }) => {
     return (
       <div className="min-h-screen flex flex-col bg-white">
         <header className="bg-white shadow-sm">
-          <nav className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <Link to="/dashboard" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+          <nav className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+            <Link
+              to="/dashboard"
+              className="flex items-center space-x-2 sm:space-x-3"
+            >
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-6 h-6 text-white"
+                  className="w-4 h-4 sm:w-6 sm:h-6 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -189,19 +197,19 @@ const Layout = ({ children }) => {
                   />
                 </svg>
               </div>
-              <span className="text-2xl font-bold text-gray-900">
-                NeuroScan
+              <span className="text-lg sm:text-2xl font-bold text-gray-900">
+                Cerebro-AI
               </span>
             </Link>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link
                 to="/login"
-                className="px-4 py-2 text-gray-600 hover:text-blue-600 font-medium"
+                className="px-2 sm:px-4 py-2 text-gray-600 hover:text-blue-600 font-medium text-sm sm:text-base"
               >
                 Sign In
               </Link>
               <Link to="/signup">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-6 py-2 rounded-lg font-medium text-sm sm:text-base">
                   Get Started
                 </Button>
               </Link>
@@ -232,25 +240,30 @@ const Layout = ({ children }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-60 bg-white shadow-sm transition-transform duration-300 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 sm:w-60 bg-white shadow-lg lg:shadow-sm transition-transform duration-300 ${
           isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 lg:static lg:inset-0 flex flex-col`}
       >
         {/* Logo Section */}
-        <div className="h-20 flex items-center px-6 border-b border-gray-100 flex-shrink-0">
-          <Link to="/dashboard" className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">N</span>
+        <div className="h-16 sm:h-20 flex items-center px-4 sm:px-6 border-b border-gray-100 flex-shrink-0">
+          <Link
+            to="/dashboard"
+            className="flex items-center space-x-2 sm:space-x-3"
+          >
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">+</span>
             </div>
             <div>
-              <span className="text-lg font-bold text-gray-900">NeuroScan</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">
+                Cerebro-AI
+              </span>
               <p className="text-xs text-gray-500">Patient Portal</p>
             </div>
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 overflow-y-auto">
+        <nav className="flex-1 px-3 sm:px-4 py-4 sm:py-6 overflow-y-auto">
           <div className="space-y-1">
             {sidebarItems.map((item, index) => {
               if (item.showFor && profile?.role !== item.showFor) return null;
@@ -262,7 +275,7 @@ const Layout = ({ children }) => {
                 <Link
                   key={index}
                   to={item.href}
-                  className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  className={`flex items-center px-3 py-3 sm:py-2.5 text-sm font-medium rounded-lg transition-all ${
                     isActive
                       ? "bg-blue-50 text-blue-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -284,7 +297,7 @@ const Layout = ({ children }) => {
         </nav>
 
         {/* User Profile and Sign Out Section */}
-        <div className="border-t border-gray-100 p-4 flex-shrink-0 space-y-3">
+        <div className="border-t border-gray-100 p-3 sm:p-4 flex-shrink-0 space-y-3">
           {/* User Profile in Sidebar */}
           <div className="flex items-center space-x-3 px-3 py-2">
             <UserAvatar size="sm" />
@@ -301,10 +314,10 @@ const Layout = ({ children }) => {
           {/* Sign Out Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full"
+            className="flex items-center px-3 py-2.5 sm:py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full"
           >
             <svg
-              className="w-4 h-4 mr-2"
+              className="w-4 h-4 mr-2 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -324,14 +337,14 @@ const Layout = ({ children }) => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
-        <header className="h-20 bg-white shadow-sm flex items-center justify-between px-8 border-b border-gray-100 flex-shrink-0">
-          <div className="flex items-center space-x-4">
+        <header className="h-16 sm:h-20 bg-white shadow-sm flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-gray-100 flex-shrink-0">
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
             <button
               onClick={toggleMobileSidebar}
-              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
+              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5 sm:w-6 sm:h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -344,11 +357,11 @@ const Layout = ({ children }) => {
                 />
               </svg>
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
                 {getCurrentPageTitle()}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
                 {location.pathname === "/dashboard" &&
                   "Your health journey is our priority. Here's a summary of your recent activity."}
                 {location.pathname === "/upload" &&
@@ -363,11 +376,11 @@ const Layout = ({ children }) => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
             {/* Notification Bell */}
-            <button className="p-2 text-gray-400 hover:text-gray-600 relative">
+            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4 sm:w-5 sm:h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -381,13 +394,20 @@ const Layout = ({ children }) => {
               </svg>
             </button>
 
-            {/* User Profile */}
-            <UserAvatar size="sm" showName={true} showRole={true} />
+            {/* User Profile - Hidden on small screens, shown on medium and up */}
+            <div className="hidden md:block">
+              <UserAvatar size="sm" showName={true} showRole={true} />
+            </div>
 
-            {/* Sign Out Button */}
+            {/* User Profile - Visible on small screens only */}
+            <div className="block md:hidden">
+              <UserAvatar size="sm" />
+            </div>
+
+            {/* Sign Out Button - Hidden on mobile, shown on larger screens */}
             <button
               onClick={handleLogout}
-              className="flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="hidden lg:flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             >
               <svg
                 className="w-4 h-4 mr-2"
@@ -408,8 +428,8 @@ const Layout = ({ children }) => {
         </header>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-8 bg-gray-50">
-          <div className="mx-auto">{children}</div>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50">
+          <div className="mx-auto max-w-full">{children}</div>
         </main>
       </div>
     </div>
