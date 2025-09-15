@@ -41,7 +41,15 @@ const DetailItem = ({ icon, label, value }) => {
 
 const ResultCard = ({ report }) => {
   const { profile } = useAuth(); // Get user profile to check role
-  const { id, image_url, prediction, confidence, created_at, status } = report;
+  const {
+    id,
+    image_url,
+    prediction,
+    confidence,
+    created_at,
+    status,
+    gradcam_image_url,
+  } = report;
 
   // Correctly get patient_name from the nested profiles object
   const patient_name = report.profiles?.full_name;
@@ -117,7 +125,7 @@ const ResultCard = ({ report }) => {
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor("#FFFFFF");
-    pdf.text("NeuroScan AI - Analysis Report", pageWidth / 2, 16, {
+    pdf.text("Cerebro AI - Analysis Report", pageWidth / 2, 16, {
       align: "center",
     });
 
@@ -179,30 +187,71 @@ const ResultCard = ({ report }) => {
     }
 
     // --- Image Section ---
-    if (image_url) {
+    // if (gradcam_image_url) {
+    //   try {
+    //     const imagePath = image_url.split("/scan_images/")[1]?.split("?")[0];
+    //     if (!imagePath) throw new Error("Invalid image path");
+    //     const response = await api.get(`/image-proxy/${imagePath}`, {
+    //       responseType: "blob",
+    //     });
+    //     const localImageUrl = URL.createObjectURL(response.data);
+    //     const img = new Image();
+    //     img.src = localImageUrl;
+    //     await new Promise((resolve, reject) => {
+    //       img.onload = resolve;
+    //       img.onerror = reject;
+    //     });
+    //     pdf.addPage();
+    //     pdf.setFontSize(16);
+    //     pdf.setFont("helvetica", "bold");
+    //     pdf.text("Uploaded MRI Scan", pageWidth / 2, 20, { align: "center" });
+    //     const imgWidth = 180;
+    //     const imgHeight = (img.height * imgWidth) / img.width;
+    //     pdf.addImage(img, "JPEG", 15, 30, imgWidth, imgHeight);
+    //     URL.revokeObjectURL(localImageUrl);
+    //   } catch (error) {
+    //     toast.error("Could not add image to PDF: " + error.message);
+    //   }
+    // }
+
+    // --- Grad-CAM Image Section ---
+    if (gradcam_image_url) {
       try {
-        const imagePath = image_url.split("/scan_images/")[1]?.split("?")[0];
-        if (!imagePath) throw new Error("Invalid image path");
-        const response = await api.get(`/image-proxy/${imagePath}`, {
+        const gradcamPath = gradcam_image_url
+          .split("/scan_images/")[1]
+          ?.split("?")[0];
+        if (!gradcamPath) throw new Error("Invalid Grad-CAM image path");
+        const response = await api.get(`/image-proxy/${gradcamPath}`, {
           responseType: "blob",
         });
-        const localImageUrl = URL.createObjectURL(response.data);
-        const img = new Image();
-        img.src = localImageUrl;
+        const localGradcamUrl = URL.createObjectURL(response.data);
+        const gradcamImg = new Image();
+        gradcamImg.src = localGradcamUrl;
         await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
+          gradcamImg.onload = resolve;
+          gradcamImg.onerror = reject;
         });
         pdf.addPage();
         pdf.setFontSize(16);
         pdf.setFont("helvetica", "bold");
-        pdf.text("Uploaded MRI Scan", pageWidth / 2, 20, { align: "center" });
+        pdf.text("Grad-CAM Visualization", pageWidth / 2, 20, {
+          align: "center",
+        });
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "italic");
+        pdf.text(
+          "Heat map highlighting regions of interest in the scan",
+          pageWidth / 2,
+          30,
+          { align: "center" }
+        );
+        pdf.setFont("helvetica", "normal");
         const imgWidth = 180;
-        const imgHeight = (img.height * imgWidth) / img.width;
-        pdf.addImage(img, "JPEG", 15, 30, imgWidth, imgHeight);
-        URL.revokeObjectURL(localImageUrl);
+        const imgHeight = (gradcamImg.height * imgWidth) / gradcamImg.width;
+        pdf.addImage(gradcamImg, "JPEG", 15, 40, imgWidth, imgHeight);
+        URL.revokeObjectURL(localGradcamUrl);
       } catch (error) {
-        toast.error("Could not add image to PDF: " + error.message);
+        toast.error("Could not add Grad-CAM image to PDF: " + error.message);
       }
     }
 
@@ -228,7 +277,7 @@ const ResultCard = ({ report }) => {
     try {
       const pdfBlob = await generatePdfBlob();
       if (!pdfBlob) throw new Error("Failed to generate PDF");
-      const fileName = `NeuroScan-Report-${report.id}.pdf`;
+      const fileName = `Cerebro-AI Report-${report.id}.pdf`;
       const pdfFile = new File([pdfBlob], fileName, {
         type: "application/pdf",
       });
@@ -256,7 +305,7 @@ const ResultCard = ({ report }) => {
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `NeuroScan-Report-${report.id}.pdf`;
+      link.download = `Cerebro-AI Report-${report.id}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -347,6 +396,29 @@ const ResultCard = ({ report }) => {
                 </div>
               </div>
             </div>
+
+            {/* Grad-CAM Visualization */}
+            {report.gradcam_image_url && (
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                  <Icon
+                    path="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    className="h-4 w-4 mr-2 text-green-600"
+                  />
+                  Grad-CAM Visualization
+                </h4>
+                <div className="bg-gray-50 p-3 rounded-lg border text-center">
+                  <img
+                    src={report.gradcam_image_url}
+                    alt="Grad-CAM Visualization"
+                    className="max-h-64 mx-auto rounded-lg shadow-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Heat map highlighting regions of interest in the scan
+                  </p>
+                </div>
+              </div>
+            )}
 
             {loadingAnalysis ? (
               <div className="flex items-center justify-center py-12">
@@ -541,9 +613,10 @@ const ResultCard = ({ report }) => {
         <div className="relative">
           <img
             src={
-              image_url || "https://via.placeholder.com/400x240?text=MRI+Scan"
+              gradcam_image_url ||
+              "https://via.placeholder.com/400x240?text=MRI+Scan"
             }
-            alt="MRI Scan"
+            alt="Grad-CAM Visualization"
             className="w-full h-48 object-cover"
           />
 

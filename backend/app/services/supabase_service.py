@@ -116,8 +116,26 @@ async def upload_gradcam_image(gradcam_b64: str, user_id: str, request: Request)
     try:
         supabase = request.app.state.supabase
         
+        # Clean the base64 string if it contains metadata prefix
+        if ',' in gradcam_b64:
+            # Remove prefix like 'data:image/png;base64,'
+            gradcam_b64 = gradcam_b64.split(',', 1)[1]
+        
+        # Remove any whitespace, newlines or other non-base64 characters
+        gradcam_b64 = gradcam_b64.strip().replace('\n', '').replace('\r', '')
+        
+        # Add padding if needed
+        padding = len(gradcam_b64) % 4
+        if padding:
+            gradcam_b64 += '=' * (4 - padding)
+        
         # Decode the base64 string
-        image_data = base64.b64decode(gradcam_b64)
+        try:
+            image_data = base64.b64decode(gradcam_b64)
+        except Exception as decode_error:
+            print(f"Base64 decoding error: {str(decode_error)}")
+            # Try with URL-safe base64 decoding as fallback
+            image_data = base64.urlsafe_b64decode(gradcam_b64)
         
         # Create a unique filename
         unique_filename = f"{user_id}/gradcam_{uuid.uuid4()}.png"

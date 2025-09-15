@@ -53,7 +53,7 @@ const SignUpForm = () => {
           <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
             <div className="w-5 h-5 bg-white rounded-md opacity-90"></div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">NeuroScan</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Cerebro-AI</h1>
         </div>
         <Link
           to="/login"
@@ -72,7 +72,7 @@ const SignUpForm = () => {
               Create your account
             </h2>
             <p className="text-lg text-gray-600">
-              Join NeuroScan to get insights about your brain health.
+              Join Cerebro-AI to get insights about your brain health.
             </p>
           </div>
 

@@ -30,7 +30,7 @@ const HomePage = () => {
             </div>
             <div>
               <h1 className="text-lg sm:text-xl lg:text-2xl font-black bg-gradient-to-r from-gray-900 via-indigo-900 to-violet-900 bg-clip-text text-transparent">
-                NeuroScan
+                Cerebro-AI
               </h1>
               <p className="text-xs sm:text-xs font-semibold text-indigo-600/80 hidden sm:block">
                 AI Medical Technology
@@ -80,7 +80,7 @@ const HomePage = () => {
 
             {/* Professional Description */}
             <p className="text-sm sm:text-base lg:text-xl font-medium text-gray-700 max-w-3xl mx-auto leading-relaxed px-4 sm:px-0">
-              NeuroScan revolutionizes medical diagnostics with{" "}
+              Cerebro-AI revolutionizes medical diagnostics with{" "}
               <span className="text-indigo-600 font-bold">
                 cutting-edge AI technology
               </span>
@@ -91,8 +91,6 @@ const HomePage = () => {
               </span>
               .
             </p>
-
-          
 
             {/* Action Buttons Below Stats */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 pt-6 sm:pt-8 px-4 sm:px-0">
@@ -362,7 +360,7 @@ const HomePage = () => {
                 </div>
                 <div>
                   <span className="text-lg sm:text-xl font-bold text-white">
-                    NeuroScan
+                    Cerebro-AI
                   </span>
                   <p className="text-indigo-300 text-xs">
                     AI Medical Technology
@@ -374,7 +372,8 @@ const HomePage = () => {
               <div className="flex flex-col lg:flex-row items-center space-y-2 sm:space-y-3 lg:space-y-0 lg:space-x-6">
                 <div className="text-center lg:text-left">
                   <p className="text-gray-300 font-medium text-sm sm:text-base">
-                    © {new Date().getFullYear()} NeuroScan. All rights reserved.
+                    © {new Date().getFullYear()} Cerebro-AI. All rights
+                    reserved.
                   </p>
                   <p className="text-indigo-400 text-xs sm:text-sm">
                     Advancing healthcare through AI innovation

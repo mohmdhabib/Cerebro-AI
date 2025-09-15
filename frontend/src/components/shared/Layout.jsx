@@ -190,7 +190,7 @@ const Layout = ({ children }) => {
                 </svg>
               </div>
               <span className="text-2xl font-bold text-gray-900">
-                NeuroScan
+                Cerebro-AI
               </span>
             </Link>
             <div className="flex items-center space-x-4">
@@ -243,7 +243,7 @@ const Layout = ({ children }) => {
               <span className="text-white font-bold text-sm">N</span>
             </div>
             <div>
-              <span className="text-lg font-bold text-gray-900">NeuroScan</span>
+              <span className="text-lg font-bold text-gray-900">Cerebro-AI</span>
               <p className="text-xs text-gray-500">Patient Portal</p>
             </div>
           </Link>
