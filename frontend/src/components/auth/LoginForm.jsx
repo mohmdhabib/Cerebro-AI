@@ -29,7 +29,7 @@ const LoginForm = () => {
     <div className="min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between px-8 py-6">
-        <div className="flex items-center">
+        <Link to='/' className="flex items-center">
           {/* Brain Logo */}
           <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center mr-3 shadow-lg">
             <svg
@@ -41,10 +41,10 @@ const LoginForm = () => {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Cerebro-AI</h1>
-        </div>
+        </Link>
         <Link
           to="/signup"
-          className="px-6 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+          className="px-6 py-2 bg-blue-500 text-white border border-gray-300 rounded-lg hover:bg-blue-400 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
         >
           Sign Up
         </Link>
