@@ -4,7 +4,7 @@ import base64
 
 # --- GCP Endpoint Configuration ---
 # TODO: Replace with your actual GCP endpoint URL
-GCP_ENDPOINT_URL = "http://localhost:8000/predict/"  # Example placeholder
+GCP_ENDPOINT_URL = "https://mohammedhabib-btd.hf.space/predict/"  # Example placeholder
 
 # --- Main Prediction Function ---
 async def predict(image_file):
