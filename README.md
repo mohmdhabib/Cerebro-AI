@@ -37,6 +37,7 @@ It streamlines the diagnostic process for clinicians and radiologists through au
 ---
 
 ## 🖥️ Application Architecture
+```
 +-------------------------------------------------------------+
 |                         Cerebro AI                          |
 +-------------------------------------------------------------+
@@ -61,6 +62,7 @@ It streamlines the diagnostic process for clinicians and radiologists through au
 |   - profiles (user info, roles)                             |
 |   - reports (MRI results, Grad-CAM images)                  |
 +-------------------------------------------------------------+
+```
 
 
 ## 🧰 Tech Stack
