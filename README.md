@@ -66,12 +66,14 @@ It streamlines the diagnostic process for clinicians and radiologists through au
 
 
 ## 🧰 Tech Stack
+```
 Layer	Technologies
 Model	TensorFlow, Keras, EfficientNetB0, Grad-CAM
 Backend	FastAPI, Uvicorn, JWT Authentication
 Frontend	React, Vite, Axios, React Router
 Database	Supabase (PostgreSQL + Storage)
 Deployment	Docker, Google Cloud Run
+```
 
 ---
 
